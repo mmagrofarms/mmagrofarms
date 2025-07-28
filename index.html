@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
   <title>M&M Agro Farms</title>
   <style>
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     .offer-blink { animation: blink 1.2s infinite; }
-
     body {
       font-family: Arial, sans-serif;
       background-color: #f0fff0;
@@ -17,7 +16,6 @@
       min-height: 100vh;
       margin: 0;
     }
-
     .card {
       background-color: #d4edda;
       padding: 30px;
@@ -27,10 +25,6 @@
       width: 90%;
       text-align: center;
     }
-
-    .card h1 { color: #155724; font-size: 24px; margin-bottom: 15px; }
-    .card p { color: #333; font-size: 16px; margin-bottom: 10px; }
-
     .card button {
       background-color: #28a745;
       color: white;
@@ -41,16 +35,15 @@
       cursor: pointer;
       margin-top: 20px;
     }
-
-    .card button:hover { background-color: #218838; }
-
+    .card button:hover {
+      background-color: #218838;
+    }
     #orderFormContainer {
       display: none;
       width: 100%;
       max-width: 800px;
       margin-top: 20px;
     }
-
     #orderFrame {
       width: 100%;
       height: 700px;
@@ -61,40 +54,37 @@
 <body>
 
   <div class="card" id="offerCard">
-    <h2 style="color: #1b5e20;">WELCOME TO</h2>
+    <h2>WELCOME TO</h2>
     <h1>M&M AGRO FARMS</h1>
-
-    <div class="offer-blink" style="margin-top: 10px;">
-      <div style="background-color: #ffcc00; padding: 10px 20px; border-radius: 25px; display:inline-block;">
+    <div class="offer-blink">
+      <div style="background-color: #ffcc00; padding: 10px 20px; border-radius: 25px;">
         <span style="font-size: 14px; font-weight: bold; color: #b30000;">🌟 SPECIAL OFFER: ₹850 Per Kg 🌟</span>
       </div>
-      <p style="font-weight: bold; color: #d32f2f; font-size: 18px;">💯 100% ORGANIC POTTEL MUTTON 💯</p>
+      <p style="color: #d32f2f; font-size: 18px; font-weight: bold;">💯 100% ORGANIC POTTEL MUTTON 💯</p>
     </div>
-
     <p>🚚 Doorstep Delivery Available within a 5 km Radius of Kompally</p>
-    <p style="color:red; font-weight:bold;">📅 Orders accepted from Sunday 8AM to Saturday 9PM only</p>
-    <button onclick="checkOrderTime()">Order Now</button>
+    <button onclick="showOrderForm()">Order Now</button>
   </div>
 
   <div id="orderFormContainer">
-    <iframe id="orderFrame" src="order.html"></iframe>
+    <iframe id="orderFrame"></iframe>
   </div>
 
   <script>
-    function checkOrderTime() {
+    function showOrderForm() {
       const now = new Date();
-      const day = now.getDay(); // 0 = Sunday, 6 = Saturday
-      const hour = now.getHours();
-      const minute = now.getMinutes();
+      const currentDay = now.getDay(); // Sunday = 0, Monday = 1, ..., Saturday = 6
+      const currentHour = now.getHours();
 
-      const isAfterSunday8am = (day > 0) || (day === 0 && hour >= 8);
-      const isBeforeSaturday9pm = (day < 6) || (day === 6 && (hour < 21 || (hour === 21 && minute === 0)));
+      const isSundayToSaturday = currentDay >= 0 && currentDay <= 6;
+      const isBefore9PM = currentDay !== 6 || (currentDay === 6 && currentHour < 21);
 
-      if (isAfterSunday8am && isBeforeSaturday9pm) {
+      if (isSundayToSaturday && isBefore9PM) {
         document.getElementById('offerCard').style.display = 'none';
         document.getElementById('orderFormContainer').style.display = 'block';
+        document.getElementById('orderFrame').src = 'order.html';
       } else {
-        alert("🚫 Orders are accepted from Sunday 8AM to Saturday 9PM only.\nYour order was rejected due to time restrictions.");
+        alert("⛔ Order rejected: Orders are accepted only from Sunday 8AM to Saturday 9PM.");
       }
     }
   </script>
