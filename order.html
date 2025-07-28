@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pottel Mutton Order</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0fff0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .form-container {
+      background-color: #d4edda;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      max-width: 400px;
+      width: 90%;
+      position: relative;
+    }
+
+    .form-container h2 {
+      color: #155724;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .offer {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background-color: #ff6347;
+      color: white;
+      padding: 8px 14px;
+      font-weight: bold;
+      border-radius: 20px;
+      animation: pulse 1.2s infinite;
+      font-size: 14px;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+      color: #155724;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+
+    .total-box {
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #000;
+    }
+
+    #thankYou {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="offer">Offer: ₹850/Kg</div>
+    <h2>Pottel Mutton Order</h2>
+
+    <form id="orderForm">
+      <label for="name">Name</label>
+      <input type="text" id="name" required oninput="this.value = this.value.toUpperCase()" />
+
+      <label for="mobile">Mobile No</label>
+      <input type="tel" id="mobile" maxlength="10" required pattern="\d{10}" />
+
+      <label for="kgs">Quantity (Kg)</label>
+      <input type="number" id="kgs" required min="0.5" step="0.5" />
+
+      <label for="address">Delivery Address</label>
+      <textarea id="address" required></textarea>
+
+      <label for="datetime">Preferred Date & Time</label>
+      <input type="datetime-local" id="datetime" required />
+
+      <label for="message">Additional Notes / Message</label>
+      <textarea id="message" placeholder="e.g. Call before delivery..."></textarea>
+
+      <div class="total-box">
+        Total: ₹<span id="total">0.00</span>
+      </div>
+
+      <button type="submit" id="submitBtn">Submit via WhatsApp</button>
+    </form>
+
+    <div id="thankYou">✅ Thank you for your order! We will contact you soon.</div>
+  </div>
+
+  <script>
+    window.onload = function () {
+      const ratePerKg = 850;
+      const form = document.getElementById('orderForm');
+      const totalSpan = document.getElementById('total');
+      const kgsInput = document.getElementById('kgs');
+      const thankYou = document.getElementById('thankYou');
+      const submitBtn = document.getElementById('submitBtn');
+
+      // Calculate total on quantity input
+      kgsInput.addEventListener('input', () => {
+        const qty = parseFloat(kgsInput.value) || 0;
+        totalSpan.textContent = (qty * ratePerKg).toFixed(2);
+      });
+
+      function generateOrderID() {
+        return 'MM' + Math.floor(100000 + Math.random() * 900000);
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const name = document.getElementById('name').value.trim();
+        const mobile = document.getElementById('mobile').value.trim();
+        const kgs = parseFloat(document.getElementById('kgs').value);
+        const address = document.getElementById('address').value.trim();
+        const datetime = document.getElementById('datetime').value.trim();
+        const message = document.getElementById('message').value.trim();
+        const total = kgs * ratePerKg;
+        const orderID = generateOrderID();
+
+        if (!name || !mobile || isNaN(kgs) || !address || !datetime || mobile.length !== 10) {
+          alert('Please fill all required fields correctly.');
+          return;
+        }
+
+        let msg = `*M&M Agro Farms Order*\n\nOrder ID: ${orderID}\nName: ${name}\nMobile: ${mobile}\nProduct: Pottel Mutton\nQuantity: ${kgs} Kg\nTotal: ₹${total.toFixed(2)}\nDelivery Address: ${address}\nDate & Time: ${datetime}`;
+        if (message) {
+          msg += `\nNote: ${message}`;
+        }
+
+        const confirmText = msg.replace(/\*/g, '');
+        const isConfirmed = confirm(`Please confirm your order:\n\n${confirmText}`);
+        if (isConfirmed) {
+          const url = `https://wa.me/918688014021?text=${encodeURIComponent(msg)}`;
+          submitBtn.disabled = true;
+          window.open(url, '_blank');
+
+          thankYou.style.display = 'block';
+          form.reset();
+          totalSpan.textContent = '0.00';
+
+          setTimeout(() => {
+            submitBtn.disabled = false;
+          }, 3000);
+        }
+      });
+    };
+  </script>
+</body>
+</html>
