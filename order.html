@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Pottel Mutton Order - M&M Agro Farms</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -80,11 +80,9 @@
       font-weight: bold;
       color: #000;
     }
-    #thankYou {
-      display: none;
+    .message {
       text-align: center;
       margin-top: 20px;
-      color: green;
       font-weight: bold;
     }
   </style>
@@ -93,89 +91,104 @@
   <div class="form-container">
     <div class="offer">Offer: ₹850/Kg</div>
     <h2>Pottel Mutton Order</h2>
-
     <form id="orderForm">
       <label for="name">Name</label>
-      <input type="text" id="name" required oninput="this.value = this.value.toUpperCase()" />
+      <input type="text" id="name" name="name" required oninput="this.value = this.value.toUpperCase()">
 
       <label for="mobile">Mobile No</label>
-      <input type="tel" id="mobile" maxlength="10" required pattern="\d{10}" />
+      <input type="tel" id="mobile" name="mobile" maxlength="10" pattern="\d{10}" required>
 
-      <label for="kgs">Quantity (Kg)</label>
-      <input type="number" id="kgs" required min="0.5" step="0.5" />
+      <label for="quantity">Quantity (Kg)</label>
+      <input type="number" id="quantity" name="quantity" required min="0.5" step="0.5">
 
       <label for="address">Delivery Address</label>
-      <textarea id="address" required></textarea>
+      <textarea id="address" name="address" required></textarea>
 
       <label for="datetime">Preferred Date & Time</label>
-      <input type="datetime-local" id="datetime" required />
+      <input type="datetime-local" id="datetime" name="datetime" required>
 
-      <label for="message">Additional Notes / Message</label>
-      <textarea id="message" placeholder="e.g. Call before delivery..."></textarea>
+      <label for="notes">Additional Notes</label>
+      <textarea id="notes" name="notes" placeholder="e.g. Call before delivery..."></textarea>
 
       <div class="total-box">
         Total: ₹<span id="total">0.00</span>
       </div>
 
-      <button type="submit">Submit via WhatsApp</button>
+      <button type="submit">Submit Order</button>
     </form>
-
-    <div id="thankYou">✅ Thank you for your order! We will contact you soon.</div>
+    <div class="message" id="responseMsg"></div>
   </div>
 
   <script>
-    window.onload = function () {
-      const ratePerKg = 850;
-      const form = document.getElementById('orderForm');
-      const totalSpan = document.getElementById('total');
-      const kgsInput = document.getElementById('kgs');
-      const thankYou = document.getElementById('thankYou');
+    const sheetURL = "https://sheetdb.io/api/v1/xxxxxxxxxxxx"; // Replace with your SheetDB URL
+    const pricePerKg = 850;
 
-      // Update total price when quantity changes
-      kgsInput.addEventListener('input', () => {
-        const qty = parseFloat(kgsInput.value) || 0;
-        totalSpan.textContent = (qty * ratePerKg).toFixed(2);
-      });
+    const isWithinOrderTime = () => {
+      const now = new Date();
+      const day = now.getDay();
+      const hour = now.getHours();
+      if (day === 0 && hour >= 8) return true; // Sunday 8AM onward
+      if (day > 0 && day < 6) return true; // Monday to Friday
+      if (day === 6 && hour < 21) return true; // Saturday before 9PM
+      return false;
+    };
 
-      // Generate a random order ID
-      function generateOrderID() {
-        return 'MM' + Math.floor(100000 + Math.random() * 900000);
+    document.getElementById('quantity').addEventListener('input', () => {
+      const qty = parseFloat(document.getElementById('quantity').value) || 0;
+      document.getElementById('total').textContent = (qty * pricePerKg).toFixed(2);
+    });
+
+    document.getElementById('orderForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const mobile = document.getElementById('mobile').value.trim();
+      const quantity = parseFloat(document.getElementById('quantity').value);
+      const address = document.getElementById('address').value.trim();
+      const datetime = document.getElementById('datetime').value.trim();
+      const notes = document.getElementById('notes').value.trim();
+      const total = quantity * pricePerKg;
+      const orderID = "M&M" + Math.floor(Math.random() * 90000 + 10000);
+      const responseMsg = document.getElementById('responseMsg');
+
+      if (!isWithinOrderTime()) {
+        responseMsg.innerHTML = "⛔ Order window closed. We accept orders only from Sunday 8 AM to Saturday 9 PM.";
+        return;
       }
 
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const name = document.getElementById('name').value.trim();
-        const mobile = document.getElementById('mobile').value.trim();
-        const kgs = parseFloat(document.getElementById('kgs').value);
-        const address = document.getElementById('address').value.trim();
-        const datetime = document.getElementById('datetime').value.trim();
-        const message = document.getElementById('message').value.trim();
-        const total = kgs * ratePerKg;
-        const orderID = generateOrderID();
-
-        if (!name || !mobile || isNaN(kgs) || !address || !datetime || mobile.length !== 10) {
-          alert('Please fill all required fields correctly.');
-          return;
+      const orderData = {
+        data: {
+          name: name,
+          mobile: mobile,
+          quantity: quantity,
+          address: address,
+          datetime: datetime,
+          message: notes || "Order Accepted ✅",
+          total: total.toFixed(2),
+          order_id: orderID
         }
+      };
 
-        let msg = `*M&M Agro Farms Order*\n\nOrder ID: ${orderID}\nName: ${name}\nMobile: ${mobile}\nProduct: Pottel Mutton\nQuantity: ${kgs} Kg\nTotal: ₹${total.toFixed(2)}\nDelivery Address: ${address}\nDate & Time: ${datetime}`;
-        if (message) {
-          msg += `\nNote: ${message}`;
+      try {
+        const res = await fetch(sheetURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderData)
+        });
+
+        if (res.ok) {
+          responseMsg.innerHTML = `✅ Order Placed! Order ID: ${orderID}<br>Total: ₹${total.toFixed(2)}<br>You'll get WhatsApp confirmation shortly.`;
+          window.open(`https://wa.me/${mobile}?text=${encodeURIComponent("Your order " + orderID + " has been confirmed for ₹" + total.toFixed(2))}`, '_blank');
+          document.getElementById('orderForm').reset();
+          document.getElementById('total').textContent = '0.00';
+        } else {
+          responseMsg.innerHTML = "❌ Failed to save order. Try again.";
         }
-
-        const confirmMsg = msg.replace(/\*/g, ''); // Clean for confirmation dialog
-        const isConfirmed = confirm(`Please confirm your order:\n\n${confirmMsg}`);
-        if (isConfirmed) {
-          const whatsappURL = `https://wa.me/918688014021?text=${encodeURIComponent(msg)}`;
-          window.open(whatsappURL, '_blank');
-
-          thankYou.style.display = 'block';
-          form.reset();
-          totalSpan.textContent = '0.00';
-        }
-      });
-    };
+      } catch (error) {
+        responseMsg.innerHTML = "❌ Error saving order.";
+        console.error("Error:", error);
+      }
+    });
   </script>
 </body>
 </html>
