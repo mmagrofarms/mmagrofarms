@@ -1,18 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>M&M Agro Farms</title>
-
   <style>
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-
-    .offer-blink {
-      animation: blink 1.2s infinite;
-    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .offer-blink { animation: blink 1.2s infinite; }
 
     body {
       font-family: Arial, sans-serif;
@@ -35,17 +28,8 @@
       text-align: center;
     }
 
-    .card h1 {
-      color: #155724;
-      font-size: 24px;
-      margin-bottom: 15px;
-    }
-
-    .card p {
-      color: #333;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
+    .card h1 { color: #155724; font-size: 24px; margin-bottom: 15px; }
+    .card p { color: #333; font-size: 16px; margin-bottom: 10px; }
 
     .card button {
       background-color: #28a745;
@@ -58,9 +42,7 @@
       margin-top: 20px;
     }
 
-    .card button:hover {
-      background-color: #218838;
-    }
+    .card button:hover { background-color: #218838; }
 
     #orderFormContainer {
       display: none;
@@ -78,34 +60,42 @@
 </head>
 <body>
 
-  <!-- ✅ Offer Card -->
-  <div class="card">
-    <div style="text-align: center; margin-bottom: 20px; background-color: #f0fff0; padding: 20px; border-radius: 12px;">
-      <h2 style="color: #1b5e20; font-size: 18px; margin: 0; font-weight: bold;">WELCOME TO</h2>
-      <h1 style="font-size: 26px; color: #0c5c31; font-weight: bold; margin: 5px 0;">M&M AGRO FARMS</h1>
+  <div class="card" id="offerCard">
+    <h2 style="color: #1b5e20;">WELCOME TO</h2>
+    <h1>M&M AGRO FARMS</h1>
 
-      <div class="offer-blink" style="margin-top: 10px;">
-        <div style="display: inline-block; background-color: #ffcc00; padding: 10px 20px; border-radius: 25px;">
-          <span style="font-size: 14px; font-weight: bold; color: #b30000;">🌟 SPECIAL OFFER: ₹850 Per Kg 🌟</span>
-        </div>
-        <p style="font-weight: bold; color: #d32f2f; font-size: 18px; margin-top: 12px;">💯 100% ORGANIC POTTEL MUTTON 💯</p>
+    <div class="offer-blink" style="margin-top: 10px;">
+      <div style="background-color: #ffcc00; padding: 10px 20px; border-radius: 25px; display:inline-block;">
+        <span style="font-size: 14px; font-weight: bold; color: #b30000;">🌟 SPECIAL OFFER: ₹850 Per Kg 🌟</span>
       </div>
+      <p style="font-weight: bold; color: #d32f2f; font-size: 18px;">💯 100% ORGANIC POTTEL MUTTON 💯</p>
     </div>
+
     <p>🚚 Doorstep Delivery Available within a 5 km Radius of Kompally</p>
-    <button onclick="showOrderForm()">Order Now</button>
+    <p style="color:red; font-weight:bold;">📅 Orders accepted from Sunday 8AM to Saturday 9PM only</p>
+    <button onclick="checkOrderTime()">Order Now</button>
   </div>
 
-  <!-- ✅ Order Form (iframe) -->
   <div id="orderFormContainer">
-    <iframe id="orderFrame" src=""></iframe>
+    <iframe id="orderFrame" src="order.html"></iframe>
   </div>
-<iframe src="order.html" style="width:100%; height: 700px; border:none;"></iframe>
 
   <script>
-    function showOrderForm() {
-      document.querySelector('.card').style.display = 'none';
-      document.getElementById('orderFormContainer').style.display = 'block';
-      document.getElementById('orderFrame').src = 'order.html'; // Load the form inside iframe
+    function checkOrderTime() {
+      const now = new Date();
+      const day = now.getDay(); // 0 = Sunday, 6 = Saturday
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+
+      const isAfterSunday8am = (day > 0) || (day === 0 && hour >= 8);
+      const isBeforeSaturday9pm = (day < 6) || (day === 6 && (hour < 21 || (hour === 21 && minute === 0)));
+
+      if (isAfterSunday8am && isBeforeSaturday9pm) {
+        document.getElementById('offerCard').style.display = 'none';
+        document.getElementById('orderFormContainer').style.display = 'block';
+      } else {
+        alert("🚫 Orders are accepted from Sunday 8AM to Saturday 9PM only.\nYour order was rejected due to time restrictions.");
+      }
     }
   </script>
 
