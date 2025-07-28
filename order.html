@@ -121,7 +121,7 @@
 
   <script>
     const pricePerKg = 850;
-    const sheetURL = "https://sheetdb.io/api/v1/pjvv2t9oocng1; // Replace with your SheetDB URL
+    const sheetURL = "https://sheetdb.io/api/v1/pjvv2t9oocng1"; // ✅ Make sure your SheetDB API URL is correct and active
 
     function isOrderTimeAllowed() {
       const now = new Date();
@@ -181,15 +181,15 @@
 
         if (res.ok) {
           responseMsg.innerHTML = `✅ Order Placed! Order ID: ${orderID}<br>Total: ₹${total.toFixed(2)}<br>You'll get WhatsApp confirmation shortly.`;
-          window.open(`https://wa.me/${mobile}?text=${encodeURIComponent("Your order " + orderID + " has been confirmed for ₹" + total.toFixed(2))}`, '_blank');
+          window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent("Your order " + orderID + " has been confirmed for ₹" + total.toFixed(2))}`, '_blank');
           document.getElementById('orderForm').reset();
           document.getElementById('total').textContent = '0.00';
         } else {
-          responseMsg.innerHTML = "⛔ Orders are accepted only from Sunday 6 AM to Saturday 9 PM.";
+          responseMsg.innerHTML = "❌ Failed to save order. Check connection or try again later.";
         }
       } catch (err) {
         console.error(err);
-        responseMsg.innerHTML = "❌ Error occurred. Try again later.";
+        responseMsg.innerHTML = "❌ An error occurred while placing the order.";
       }
     });
   </script>
