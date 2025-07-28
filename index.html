@@ -59,9 +59,7 @@ function nowIsValid() {
   if (day === 0 && h < 7) return false;   // Sunday before 8 AM
   return true;
 }
-
  
-
 function generateOrderID() {
   return "MM" + (Math.floor(100000 + Math.random()*900000));
 }
@@ -89,7 +87,6 @@ document.getElementById("kgs").addEventListener("input", () => {
 document.getElementById("orderForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   if (!nowIsValid()) return;
-
   const name = document.getElementById("name").value.trim().toUpperCase();
   const mobile = document.getElementById("mobile").value.trim();
   const kgs = parseFloat(document.getElementById("kgs").value);
@@ -115,6 +112,7 @@ document.getElementById("orderForm").addEventListener("submit", async function(e
     const data = {orderID,name,mobile,kgs,address,datetime,total,ratePerKg: RATE_PER_KG,message:messageInput};
 
     // inside if (nowIsValid()) { ... } block
+
 try {
   await fetch(WEBHOOK_URL, {
     method: "POST",
