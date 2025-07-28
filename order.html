@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pottel Mutton Order - M&M Agro Farms</title>
   <style>
-    /* Your existing CSS here (same as your code) */
+    /* Your CSS styles here */
     body {
       font-family: Arial, sans-serif;
       background-color: #f0fff0;
@@ -126,8 +126,10 @@
     const form = document.getElementById('orderForm');
     const totalSpan = document.getElementById('total');
     const responseMsg = document.getElementById('responseMsg');
+    
+    // Your WhatsApp number (no spaces, no +)
+    const myWhatsAppNumber = "918688014021";
 
-    // Update total on quantity input
     document.getElementById('quantity').addEventListener('input', () => {
       const qty = parseFloat(document.getElementById('quantity').value) || 0;
       totalSpan.textContent = (qty * pricePerKg).toFixed(2);
@@ -178,23 +180,28 @@
         return;
       }
 
-      // Confirm order
+      // Confirm order with customer
       const confirmMsg = `Name: ${name}\nMobile: ${mobile}\nQty: ${quantity} Kg\nTotal: ₹${total.toFixed(2)}\nAddress: ${address}\nDelivery: ${datetime}\nNotes: ${notes || "None"}`;
       const isConfirmed = confirm(confirmMsg);
       if (!isConfirmed) return;
 
-      // Sanitize mobile number
-      const sanitizedMobile = mobile.replace(/^0+/, '').replace(/\D/g, '');
+      // Prepare WhatsApp message for your number
+      const waMessage = 
+        `📢 New Order Received:\n` +
+        `Order ID: ${orderID}\n` +
+        `Name: ${name}\n` +
+        `Mobile: +91 ${mobile}\n` +
+        `Quantity: ${quantity} Kg\n` +
+        `Total: ₹${total.toFixed(2)}\n` +
+        `Delivery Date & Time: ${datetime}\n` +
+        `Address: ${address}\n` +
+        `Notes: ${notes || "None"}`;
 
-      // Prepare WhatsApp message
-      const waMessage = `Hello ${name}, your order ${orderID} of ${quantity} Kg (₹${total.toFixed(2)}) has been confirmed. Delivery: ${datetime}. Thank you for choosing M&M Agro Farms!`;
+      responseMsg.innerHTML = `✅ Order Confirmed! Order ID: ${orderID}<br>Total: ₹${total.toFixed(2)}<br>Sending order to WhatsApp...`;
 
-      // Show message & open WhatsApp
-      responseMsg.innerHTML = `✅ Order Confirmed! Order ID: ${orderID}<br>Total: ₹${total.toFixed(2)}<br>Opening WhatsApp...`;
+      // Open WhatsApp chat with your number, message includes order details
+      window.open(`https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(waMessage)}`, '_blank');
 
-      window.open(`https://wa.me/91${sanitizedMobile}?text=${encodeURIComponent(waMessage)}`, '_blank');
-
-      // Reset form and total display
       form.reset();
       totalSpan.textContent = '0.00';
     });
