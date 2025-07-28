@@ -93,8 +93,9 @@
         document.getElementById("message").innerText = "❌ Order rejected: We accept orders only from Sunday 8 AM to Saturday 9 PM.";
         return;
       }
+      const scriptURL = "https://script.google.com/macros/s/AKfycbwwBksXDH30iIfX-zsxsgswuJZ-fabj_GU_j84t4t4R1ZVJW_UyukoBTwzgXIlJDJN6JQ/exec";
 
-      const scriptURL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec"; // Replace this with your actual script URL
+      //const scriptURL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec"; // Replace this with your actual script URL
       const form = document.forms["orderForm"];
       const formData = new FormData(form);
 
