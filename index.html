@@ -2,177 +2,130 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Order - M&M Agro Farms</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>M&M Agro Order</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0fff0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .form-container {
-      background: #d4edda;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      max-width: 400px;
-      width: 90%;
-    }
-    .form-container h2 {
-      color: #155724;
-      text-align: center;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-      color: #155724;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    button {
-      width: 100%;
-      margin-top: 15px;
-      padding: 10px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #218838;
-    }
-    .total-box {
-      margin-top: 10px;
-      font-weight: bold;
-    }
+    body{font-family:Arial,sans-serif;background:#f8fff8;margin:0;padding:0;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+    .container{background:#d4edda;padding:20px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,0.2);max-width:400px;width:90%;text-align:center;}
+    label{display:block;text-align:left;font-weight:bold;color:#155724;margin-top:12px;}
+    input,textarea{width:100%;padding:8px;margin-top:5px;border-radius:5px;border:1px solid #ccc;font-size:14px;}
+    button{margin-top:18px;width:100%;padding:12px;background:#28a745;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;}
+    button:disabled{background:#bbb;cursor:not-allowed;}
+    .total{margin-top:10px;font-size:16px;font-weight:bold;color:#155724;}
+    #message{margin-top:15px;font-size:15px;font-weight:bold;}
   </style>
 </head>
 <body>
-  <div class="form-container">
+  <div class="container" id="mainContainer">
     <h2>Pottel Mutton Order</h2>
-    <form id="orderForm">
-      <label>Name</label>
-      <input type="text" id="name" required />
+    <div id="orderSection" style="display:none;">
+      <form id="orderForm">
+        <label for="name">Name</label>
+        <input type="text" id="name" required/>
 
-      <label>Mobile No</label>
-      <input type="tel" id="mobile" required pattern="\d{10}" maxlength="10" />
+        <label for="mobile">Mobile No</label>
+        <input type="tel" id="mobile" required pattern="\d{10}" maxlength="10"/>
 
-      <label>Quantity (Kg)</label>
-      <input type="number" id="kgs" required min="0.5" step="0.5" />
+        <label for="kgs">Quantity (Kg)</label>
+        <input type="number" id="kgs" required min="0.5" step="0.5"/>
 
-      <label>Address</label>
-      <textarea id="address" required></textarea>
+        <label for="address">Delivery Address</label>
+        <textarea id="address" required></textarea>
 
-      <label>Preferred Date & Time</label>
-      <input type="datetime-local" id="datetime" required />
+        <label for="datetime">Preferred Date & Time</label>
+        <input type="datetime-local" id="datetime" required/>
 
-      <label>Message</label>
-      <textarea id="message" placeholder="Optional notes..."></textarea>
+        <label for="messageInput">Additional Notes/Message</label>
+        <textarea id="messageInput" placeholder="Optional"></textarea>
 
-      <div class="total-box">Total: ₹<span id="total">0.00</span></div>
+        <div class="total">Total: ₹<span id="total">0.00</span></div>
+        <button type="submit" id="submitBtn">Order via WhatsApp</button>
+      </form>
+    </div>
 
-      <button type="submit">Place Order</button>
-    </form>
+    <div id="message"></div>
   </div>
 
-  <script>
-    const ratePerKg = 850;
-    const webhookURL = "https://docs.google.com/spreadsheets/d/1Rf6VkkDM9NszrT66QQqEgf3tva2ljlXoHw3m32rMw6g/edit?usp=drive_link; // Replace with Apps Script URL
-    const whatsappNumber = "918688014021";
+<script>
+const RATE_PER_KG = 850;            // change if needed
+const WEBHOOK_URL = "YOUR_WEBHOOK_URL"; 
+const WHATSAPP = "YOUR_WHATSAPP_NUMBER"; 
 
-    document.getElementById("kgs").addEventListener("input", () => {
-      const qty = parseFloat(document.getElementById("kgs").value) || 0;
-      document.getElementById("total").textContent = (qty * ratePerKg).toFixed(2);
-    });
+function nowIsValid() {
+  const d = new Date();
+  const day = d.getDay(); // 0=Sun,6=Sat
+  const h = d.getHours(), m = d.getMinutes();
 
-    function isOrderTimeValid() {
-      const now = new Date();
-      const day = now.getDay(); // 0 = Sunday, 6 = Saturday
-      const hour = now.getHours();
-      const minute = now.getMinutes();
+  if (day === 6 && (h > 21 || (h === 21 && m > 0))) return false;
+  if (day === 0 && h < 8) return false;
+  return true;
+}
 
-      if (day === 6 && (hour > 21 || (hour === 21 && minute > 0))) return false;
-      if (day === 0 && hour < 8) return false;
-      return true;
+function generateOrderID() {
+  return "MM" + (Math.floor(100000 + Math.random()*900000));
+}
+
+// On load
+window.addEventListener("load", () => {
+  const orderSection = document.getElementById("orderSection");
+  const msg = document.getElementById("message");
+
+  if (nowIsValid()) {
+    orderSection.style.display = "block";
+    msg.textContent = "";
+  } else {
+    orderSection.style.display = "none";
+    msg.textContent = "❌ Orders are accepted only between Sunday 08:00 and Saturday 21:00. Please try within that window.";
+  }
+});
+
+// Total calculation
+document.getElementById("kgs").addEventListener("input", () => {
+  const qty = parseFloat(document.getElementById("kgs").value) || 0;
+  document.getElementById("total").textContent = (qty * RATE_PER_KG).toFixed(2);
+});
+
+document.getElementById("orderForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  if (!nowIsValid()) return;
+
+  const name = document.getElementById("name").value.trim().toUpperCase();
+  const mobile = document.getElementById("mobile").value.trim();
+  const kgs = parseFloat(document.getElementById("kgs").value);
+  const address = document.getElementById("address").value.trim();
+  const datetime = document.getElementById("datetime").value.trim();
+  const messageInput = document.getElementById("messageInput").value.trim();
+  const total = (kgs * RATE_PER_KG).toFixed(2);
+  const orderID = generateOrderID();
+
+  if (!name || mobile.length !== 10 || isNaN(kgs) || !address || !datetime) {
+    alert("Please fill all required fields correctly.");
+    return;
+  }
+
+  const confirmUri = nowIsValid() ? 
+    `✅ Order Confirmed\nID: ${orderID}\nName: ${name}\nMobile: ${mobile}\nQty: ${kgs}Kg\nRate: ₹${RATE_PER_KG}\nTotal: ₹${total}\nAddr: ${address}\nDt: ${datetime}${messageInput ? `\nNote: ${messageInput}` : ''}` :
+    `❌ Order Rejected\nDear ${name}, orders accepted only within Sunday's 08:00 to Saturday's 21:00.`;
+  
+  window.open(`https://wa.me/${WHATSAPP}?text=` + encodeURIComponent(confirmUri), "_blank");
+
+  if (nowIsValid()) {
+    // send to Google Sheet
+    const data = {orderID,name,mobile,kgs,address,datetime,total,ratePerKg: RATE_PER_KG,message:messageInput};
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {"Content-Type": "application/json"}
+      });
+    } catch(err) {
+      console.error("Save failed:", err);
     }
+  }
 
-    function generateOrderID() {
-      return "MM" + Math.floor(100000 + Math.random() * 900000);
-    }
-
-    document.getElementById("orderForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      const name = document.getElementById("name").value.trim().toUpperCase();
-      const mobile = document.getElementById("mobile").value.trim();
-      const kgs = parseFloat(document.getElementById("kgs").value);
-      const address = document.getElementById("address").value.trim();
-      const datetime = document.getElementById("datetime").value.trim();
-      const message = document.getElementById("message").value.trim();
-      const total = (kgs * ratePerKg).toFixed(2);
-      const orderID = generateOrderID();
-
-      if (!name || !mobile || isNaN(kgs) || !address || !datetime || mobile.length !== 10) {
-        alert("Please fill all fields correctly.");
-        return;
-      }
-
-      let msg;
-      let status;
-
-      if (isOrderTimeValid()) {
-        msg = `✅ *M&M Agro Order Confirmed*\n\nOrder ID: ${orderID}\nName: ${name}\nMobile: ${mobile}\nQty: ${kgs} Kg\nRate: ₹${ratePerKg}/Kg\nTotal: ₹${total}\nAddress: ${address}\nPreferred: ${datetime}${message ? `\nNote: ${message}` : ''}`;
-        status = "Accepted";
-      } else {
-        msg = `❌ *Order Rejected*\n\nDear ${name},\nWe accept orders only from Sunday 8AM to Saturday 9PM.\nPlease try again during this time window.`;
-        status = "Rejected";
-      }
-
-      // WhatsApp
-      const waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
-      window.open(waLink, "_blank");
-
-      // Save to Google Sheet only if accepted
-      if (status === "Accepted") {
-        const orderData = {
-          orderID,
-          name,
-          mobile,
-          kgs,
-          address,
-          datetime,
-          total,
-          ratePerKg,
-          message
-        };
-
-        try {
-          await fetch(webhookURL, {
-            method: "POST",
-            body: JSON.stringify(orderData),
-            headers: {
-              "Content-Type": "application/json"
-            }
-          });
-        } catch (error) {
-          console.error("Error saving to sheet:", error);
-        }
-      }
-
-      document.getElementById("orderForm").reset();
-      document.getElementById("total").textContent = "0.00";
-    });
-  </script>
+  document.getElementById("orderForm").reset();
+  document.getElementById("total").textContent = "0.00";
+});
+</script>
 </body>
 </html>
