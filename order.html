@@ -181,11 +181,17 @@
       const waMessage = `Hello ${name}, your order ${orderID} of ${quantity} Kg (₹${total.toFixed(2)}) has been confirmed.\nDelivery: ${datetime}\nAddress: ${address}\nNotes: ${notes || "None"}\n\nThank you for choosing M&M Agro Farms!`;
 
       responseMsg.innerHTML = `✅ Order Confirmed! Order ID: ${orderID}<br>Total: ₹${total.toFixed(2)}<br>Opening WhatsApp...`;
-      window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent(waMessage)}`, '_blank');
 
-      form.reset();
-      totalSpan.textContent = '0.00';
+const sanitizedMobile = mobile.replace(/^0+/, '').replace(/\D/g, '');
+const waLink = `https://wa.me/91${sanitizedMobile}?text=${encodeURIComponent(waMessage)}`;
+console.log("WhatsApp URL:", waLink);
+
+window.open(waLink, '_blank');
+
+form.reset();
+totalSpan.textContent = '0.00';
     });
   </script>
 </body>
 </html>
+
