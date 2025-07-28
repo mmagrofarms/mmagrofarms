@@ -185,7 +185,7 @@
           document.getElementById('orderForm').reset();
           document.getElementById('total').textContent = '0.00';
         } else {
-          responseMsg.innerHTML = "❌ Failed to save order. Try again.";
+          responseMsg.innerHTML = "⛔ Orders are accepted only from Sunday 6 AM to Saturday 9 PM.";
         }
       } catch (err) {
         console.error(err);
