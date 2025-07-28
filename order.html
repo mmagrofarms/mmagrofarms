@@ -1,68 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pottel Mutton Order – M&M Agro Farms</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f0fff0; margin:0; padding:0;
-      display:flex; justify-content:center; align-items:center; min-height:100vh; }
-    .form-container { background:#d4edda; padding:20px; border-radius:16px;
-      box-shadow:0 8px 20px rgba(0,0,0,0.15); max-width:400px; width:90%; }
-    .offer { position:absolute; top:-10px; right:-10px; background:#ff6347;
-      color:white; padding:8px 14px; font-weight:bold; border-radius:20px;
-      animation:pulse 1.2s infinite; font-size:14px; }
-    @keyframes pulse { 0%{transform:scale(1);}50%{transform:scale(1.1);}100%{transform:scale(1);} }
-    label { font-weight:bold; color:#155724; margin-top:10px; display:block; }
-    input, textarea { width:100%; padding:8px; margin-top:5px; border-radius:6px;
-      border:1px solid #ccc; font-size:14px; box-sizing:border-box; }
-    button { margin-top:20px; padding:10px; width:100%; background:#28a745; color:white;
-      border:none; border-radius:8px; font-size:16px; cursor:pointer; }
-    button:hover { background:#218838; }
-    .total-box { margin-top:10px; font-size:16px; font-weight:bold; color:#000; }
-    .message { margin-top:20px; font-weight:bold; color:#155724; word-break:break-word; }
-    textarea.order-copy { width:100%; resize:vertical; font-family:monospace; font-size:14px; }
-  </style>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pottel Mutton Order – M&M Agro Farms</title>
+<style>
+  body { font-family: Arial; background: #f0fff0; margin: 0; padding: 0;
+    display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+  .form-container { background: #d4edda; padding: 20px; border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15); max-width: 400px; width: 90%; position: relative; }
+  .offer { position: absolute; top: -10px; right: -10px; background: #ff6347;
+    color: white; padding: 8px 14px; font-weight: bold; border-radius: 20px;
+    animation: pulse 1.2s infinite; font-size: 14px; }
+  @keyframes pulse { 0%{transform: scale(1);}50%{transform: scale(1.1);}100%{transform: scale(1);} }
+  label { font-weight: bold; color: #155724; margin-top: 10px; display: block; }
+  input, textarea { width: 100%; padding: 8px; margin-top: 5px; border-radius: 6px;
+    border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; }
+  button { margin-top: 20px; padding: 10px; width: 100%; background: #28a745; color: white;
+    border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+  button:hover { background: #218838; }
+  .total-box { margin-top:10px; font-size:16px; font-weight:bold; color:#000; }
+  .message { margin-top: 20px; font-weight: bold; color: #155724; word-break: break-word; }
+  textarea.order-copy { width: 100%; resize: vertical; font-family: monospace; font-size: 14px; }
+</style>
 </head>
 <body>
-  <div class="form-container">
-    <div class="offer">Offer: ₹850/Kg</div>
-    <h2>Pottel Mutton Order</h2>
-    <form id="orderForm">
-      <label>Name</label><input type="text" id="name" required oninput="this.value=this.value.toUpperCase()"/>
-      <label>Mobile No</label><input type="tel" id="mobile" maxlength="10" pattern="\d{10}" required/>
-      <label>Quantity (Kg)</label><input type="number" id="quantity" required min="0.5" step="0.5"/>
-      <label>Delivery Address</label><textarea id="address" required></textarea>
-      <label>Preferred Date & Time</label><input type="datetime-local" id="datetime" required/>
-      <label>Additional Notes</label><textarea id="notes"></textarea>
-      <div class="total-box">Total: ₹<span id="total">0.00</span></div>
-      <button type="submit">Submit Order</button>
-    </form>
-    <div class="message" id="responseMsg"></div>
-  </div>
+<div class="form-container">
+  <div class="offer">Offer: ₹850/Kg</div>
+  <h2>Pottel Mutton Order</h2>
+  <form id="orderForm">
+    <label>Name</label><input type="text" id="name" required oninput="this.value = this.value.toUpperCase();">
+    <label>Mobile No</label><input type="tel" id="mobile" maxlength="10" pattern="\d{10}" required>
+    <label>Quantity (Kg)</label><input type="number" id="quantity" required min="0.5" step="0.5">
+    <label>Delivery Address</label><textarea id="address" required></textarea>
+    <label>Preferred Date & Time</label><input type="datetime-local" id="datetime" required>
+    <label>Additional Notes</label><textarea id="notes"></textarea>
+    <div class="total-box">Total: ₹<span id="total">0.00</span></div>
+    <button type="submit">Submit Order</button>
+  </form>
+  <div class="message" id="responseMsg"></div>
+</div>
 
 <script>
   const pricePerKg = 850;
   const form = document.getElementById('orderForm');
   const totalSpan = document.getElementById('total');
   const responseMsg = document.getElementById('responseMsg');
-  const myWhatsApp = "918688014021"; // your number
+  const myWhatsApp = "918688014021"; // your WhatsApp number
 
   document.getElementById('quantity').addEventListener('input', () => {
     const q = parseFloat(document.getElementById('quantity').value) || 0;
     totalSpan.textContent = (q * pricePerKg).toFixed(2);
   });
 
-  function isAllowedTime(){
+  function isAllowedTime() {
     const now = new Date(), d = now.getDay(), h = now.getHours();
-    return !(d===0 && h<6 || d===6 && h>=21);
-  }
-  function newOrderID(){
-    return 'MM'+Math.floor(100000 + Math.random()*900000);
+    return !(d === 0 && h < 6 || d === 6 && h >= 21);
   }
 
-  form.addEventListener('submit', function(e){
+  function newOrderID() {
+    return 'MM' + Math.floor(100000 + Math.random() * 900000);
+  }
+
+  form.addEventListener('submit', e => {
     e.preventDefault();
+
     const name = document.getElementById('name').value.trim();
     const mobile = document.getElementById('mobile').value.trim();
     const qty = parseFloat(document.getElementById('quantity').value);
@@ -71,36 +72,36 @@
     const notes = document.getElementById('notes').value.trim();
     const total = qty * pricePerKg;
 
-    if(!name||!mobile||isNaN(qty)||!address||!dt||mobile.length!==10){
-      alert('Please fill all required fields correctly.');
+    if (!name || !mobile || isNaN(qty) || !address || !dt || mobile.length !== 10) {
+      alert('Please fill all fields correctly.');
       return;
     }
-    const sel = new Date(dt), now=new Date();
-    if(now.getDay()===0 && sel.toDateString()===now.toDateString()){
-      responseMsg.innerHTML = "❌ Sunday delivery must be booked by Saturday 9 PM."; return;
+
+    const sel = new Date(dt), now = new Date();
+    if (now.getDay() === 0 && sel.toDateString() === now.toDateString()) {
+      responseMsg.innerHTML = "❌ Sunday delivery must be booked by Saturday 9 PM.";
+      return;
     }
-    if(!isAllowedTime()){
-      responseMsg.innerHTML = "⛔ Orders allowed only Sunday 6 AM – Saturday 9 PM."; return;
+    if (!isAllowedTime()) {
+      responseMsg.innerHTML = "⛔ Orders allowed only Sunday 6 AM – Saturday 9 PM.";
+      return;
     }
 
-    const confirmText =
-      `Name: ${name}\nMobile: ${mobile}\nQty: ${qty} Kg\nTotal: ₹${total.toFixed(2)}\n` +
-      `Address: ${address}\nDelivery: ${dt}\nNotes: ${notes||"None"}`;
-    if(!confirm(`Please confirm your order:\n\n${confirmText}`)) return;
+    const confirmText = `Name: ${name}\nMobile: ${mobile}\nQty: ${qty} Kg\nTotal: ₹${total.toFixed(2)}\nAddress: ${address}\nDelivery: ${dt}\nNotes: ${notes||"None"}`;
+    if (!confirm(`Please confirm your order:\n\n${confirmText}`)) return;
 
     const orderID = newOrderID();
     const orderDetails =
       `📢 *M&M Agro Farms* New Order\n` +
       `Order ID: ${orderID}\nName: ${name}\nMobile: +91${mobile}\n` +
-      `Qty: ${qty} Kg | Total: ₹${total.toFixed(2)}\nDelivery: ${dt}\nAddress: ${address}\nNotes: ${notes||"None"}`;
+      `Qty: ${qty} Kg\nTotal: ₹${total.toFixed(2)}\nDelivery: ${dt}\nAddress: ${address}\nNotes: ${notes||"None"}`;
 
-    const waURL = `https://wa.me/${myWhatsApp}?text=${encodeURIComponent(orderDetails)}`;
-    window.open(waURL, '_blank');
+    window.open(`https://wa.me/${myWhatsApp}?text=${encodeURIComponent(orderDetails)}`, '_blank');
 
     responseMsg.innerHTML =
-      `✅ Your order has been submitted and is awaiting confirmation from the owner.<br>` +
+      `✅ Your order has been submitted and is awaiting owner confirmation.<br>` +
       `Order ID: ${orderID}<br>Total: ₹${total.toFixed(2)}<br><br>` +
-      `Here’s your order summary (copy or share manually):<br>` +
+      `Here is your order summary (copy or share manually):<br>` +
       `<textarea class="order-copy" rows="8" readonly>${orderDetails}</textarea>`;
 
     form.reset();
