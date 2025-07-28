@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Pottel Mutton Order</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,7 +14,6 @@
       align-items: center;
       min-height: 100vh;
     }
-
     .form-container {
       background-color: #d4edda;
       padding: 20px;
@@ -25,13 +23,11 @@
       width: 90%;
       position: relative;
     }
-
     .form-container h2 {
       color: #155724;
       text-align: center;
       margin-bottom: 20px;
     }
-
     .offer {
       position: absolute;
       top: -10px;
@@ -44,29 +40,24 @@
       animation: pulse 1.2s infinite;
       font-size: 14px;
     }
-
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.1); }
       100% { transform: scale(1); }
     }
-
     label {
       font-weight: bold;
       display: block;
       margin-top: 10px;
       color: #155724;
     }
-
     input, textarea {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
       border-radius: 6px;
       border: 1px solid #ccc;
-      font-size: 15px;
     }
-
     button {
       margin-top: 20px;
       padding: 10px;
@@ -78,23 +69,15 @@
       font-size: 16px;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #218838;
     }
-
-    button:disabled {
-      background-color: #aaa;
-      cursor: not-allowed;
-    }
-
     .total-box {
       margin-top: 10px;
       font-size: 16px;
       font-weight: bold;
       color: #000;
     }
-
     #thankYou {
       display: none;
       text-align: center;
@@ -102,10 +85,17 @@
       color: green;
       font-weight: bold;
     }
+    #rejectedMsg {
+      display: none;
+      color: red;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-  <div class="form-container">
+  <div class="form-container" id="formBlock">
     <div class="offer">Offer: ₹850/Kg</div>
     <h2>Pottel Mutton Order</h2>
 
@@ -136,18 +126,45 @@
     </form>
 
     <div id="thankYou">✅ Thank you for your order! We will contact you soon.</div>
+    <div id="rejectedMsg">❌ Order rejected: We only accept orders from <b>Sunday 8:00 AM</b> to <b>Saturday 9:00 PM</b>.</div>
   </div>
 
   <script>
-    window.onload = function () {
-      const ratePerKg = 850;
+    const ratePerKg = 850;
+
+    function getWeekWindow() {
+      const now = new Date();
+      const today = now.getDay(); // Sunday = 0, Saturday = 6
+
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - today);
+      weekStart.setHours(8, 0, 0, 0); // Sunday 8:00 AM
+
+      const daysToSaturday = (6 - today + 7) % 7;
+      const weekEnd = new Date(now);
+      weekEnd.setDate(now.getDate() + daysToSaturday);
+      weekEnd.setHours(21, 0, 0, 0); // Saturday 9:00 PM
+
+      return { weekStart, weekEnd };
+    }
+
+    window.onload = () => {
+      const now = new Date();
+      const { weekStart, weekEnd } = getWeekWindow();
+
       const form = document.getElementById('orderForm');
       const totalSpan = document.getElementById('total');
       const kgsInput = document.getElementById('kgs');
       const thankYou = document.getElementById('thankYou');
+      const rejectedMsg = document.getElementById('rejectedMsg');
       const submitBtn = document.getElementById('submitBtn');
 
-      // Calculate total on quantity input
+      if (now < weekStart || now > weekEnd) {
+        submitBtn.disabled = true;
+        rejectedMsg.style.display = 'block';
+        return;
+      }
+
       kgsInput.addEventListener('input', () => {
         const qty = parseFloat(kgsInput.value) || 0;
         totalSpan.textContent = (qty * ratePerKg).toFixed(2);
@@ -175,24 +192,16 @@
         }
 
         let msg = `*M&M Agro Farms Order*\n\nOrder ID: ${orderID}\nName: ${name}\nMobile: ${mobile}\nProduct: Pottel Mutton\nQuantity: ${kgs} Kg\nTotal: ₹${total.toFixed(2)}\nDelivery Address: ${address}\nDate & Time: ${datetime}`;
-        if (message) {
-          msg += `\nNote: ${message}`;
-        }
+        if (message) msg += `\nNote: ${message}`;
 
-        const confirmText = msg.replace(/\*/g, '');
-        const isConfirmed = confirm(`Please confirm your order:\n\n${confirmText}`);
+        const isConfirmed = confirm(`Please confirm your order:\n\n${msg.replace(/\*/g, '')}`);
         if (isConfirmed) {
           const url = `https://wa.me/918688014021?text=${encodeURIComponent(msg)}`;
-          submitBtn.disabled = true;
           window.open(url, '_blank');
 
           thankYou.style.display = 'block';
           form.reset();
           totalSpan.textContent = '0.00';
-
-          setTimeout(() => {
-            submitBtn.disabled = false;
-          }, 3000);
         }
       });
     };
