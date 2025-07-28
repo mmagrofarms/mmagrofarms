@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Pottel Mutton Order - M&M Agro Farms</title>
   <style>
     body {
@@ -84,6 +84,7 @@
       text-align: center;
       margin-top: 20px;
       font-weight: bold;
+      color: #155724;
     }
   </style>
 </head>
@@ -121,11 +122,15 @@
 
   <script>
     const pricePerKg = 850;
-    const sheetURL = "https://sheetdb.io/api/v1/your_api_id_here"; // Replace with your actual SheetDB API URL
+    const sheetURL = "https://sheetdb.io/api/v1/pjvv2t9oocng1"; // 🔁 Replace with your SheetDB API
+
+    const form = document.getElementById('orderForm');
+    const totalSpan = document.getElementById('total');
+    const responseMsg = document.getElementById('responseMsg');
 
     document.getElementById('quantity').addEventListener('input', () => {
       const qty = parseFloat(document.getElementById('quantity').value) || 0;
-      document.getElementById('total').textContent = (qty * pricePerKg).toFixed(2);
+      totalSpan.textContent = (qty * pricePerKg).toFixed(2);
     });
 
     function isOrderTimeAllowed() {
@@ -135,7 +140,7 @@
       return !(day === 0 && hour < 6 || day === 6 && hour >= 21);
     }
 
-    document.getElementById('orderForm').addEventListener('submit', async function(e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const name = document.getElementById('name').value.trim();
@@ -146,7 +151,6 @@
       const notes = document.getElementById('notes').value.trim();
       const total = quantity * pricePerKg;
       const orderID = "M&M" + Math.floor(Math.random() * 90000 + 10000);
-      const responseMsg = document.getElementById('responseMsg');
 
       const selectedDate = new Date(datetime);
       const now = new Date();
@@ -162,6 +166,10 @@
         responseMsg.innerHTML = "⛔ Orders are accepted only from Sunday 6 AM to Saturday 9 PM.";
         return;
       }
+
+      const confirmMsg = `Name: ${name}\nMobile: ${mobile}\nQty: ${quantity} Kg\nTotal: ₹${total.toFixed(2)}\nAddress: ${address}\nDelivery: ${datetime}\nNotes: ${notes || "None"}`;
+      const isConfirmed = confirm(`Please confirm your order:\n\n${confirmMsg}`);
+      if (!isConfirmed) return;
 
       const orderData = {
         data: {
@@ -181,11 +189,13 @@
 
         if (res.ok) {
           responseMsg.innerHTML = `✅ Order Placed! Order ID: ${orderID}<br>Total: ₹${total.toFixed(2)}<br>You'll get WhatsApp confirmation shortly.`;
-          window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent("Your order " + orderID + " has been confirmed for ₹" + total.toFixed(2))}`, '_blank');
-          document.getElementById('orderForm').reset();
-          document.getElementById('total').textContent = '0.00';
+          const waMessage = `Hello ${name}, your order ${orderID} of ${quantity} Kg (₹${total.toFixed(2)}) has been confirmed. Delivery: ${datetime}. Thank you for choosing M&M Agro Farms!`;
+          window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent(waMessage)}`, '_blank');
+
+          form.reset();
+          totalSpan.textContent = '0.00';
         } else {
-          responseMsg.innerHTML = "❌ Failed to save order. Please try again later.";
+          responseMsg.innerHTML = "❌Orders are accepted only from Sunday 6 AM to Saturday 9 PM.";
         }
       } catch (err) {
         console.error(err);
