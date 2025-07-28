@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Pottel Mutton Order</title>
+  <title>Pottel Mutton Order | M&M Agro Farms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -78,101 +79,84 @@
       font-weight: bold;
       color: #000;
     }
-    #thankYou {
+    #thankYou, #rejectedMsg {
       display: none;
       text-align: center;
       margin-top: 20px;
-      color: green;
       font-weight: bold;
     }
-    #rejectedMsg {
-      display: none;
-      color: red;
-      font-weight: bold;
-      text-align: center;
-      margin-top: 10px;
-    }
+    #thankYou { color: green; }
+    #rejectedMsg { color: red; }
   </style>
 </head>
 <body>
   <div class="form-container" id="formBlock">
     <div class="offer">Offer: ₹850/Kg</div>
     <h2>Pottel Mutton Order</h2>
-
     <form id="orderForm">
-      <label for="name">Name</label>
+      <label>Name</label>
       <input type="text" id="name" required oninput="this.value = this.value.toUpperCase()" />
 
-      <label for="mobile">Mobile No</label>
+      <label>Mobile No</label>
       <input type="tel" id="mobile" maxlength="10" required pattern="\d{10}" />
 
-      <label for="kgs">Quantity (Kg)</label>
+      <label>Quantity (Kg)</label>
       <input type="number" id="kgs" required min="0.5" step="0.5" />
 
-      <label for="address">Delivery Address</label>
+      <label>Delivery Address</label>
       <textarea id="address" required></textarea>
 
-      <label for="datetime">Preferred Date & Time</label>
+      <label>Preferred Date & Time</label>
       <input type="datetime-local" id="datetime" required />
 
-      <label for="message">Additional Notes / Message</label>
+      <label>Additional Notes / Message</label>
       <textarea id="message" placeholder="e.g. Call before delivery..."></textarea>
 
-      <div class="total-box">
-        Total: ₹<span id="total">0.00</span>
-      </div>
+      <div class="total-box">Total: ₹<span id="total">0.00</span></div>
 
       <button type="submit" id="submitBtn">Submit via WhatsApp</button>
     </form>
 
-    <div id="thankYou">✅ Thank you for your order! We will contact you soon.</div>
-    <div id="rejectedMsg">❌ Order rejected: We only accept orders from <b>Sunday 8:00 AM</b> to <b>Saturday 9:00 PM</b>.</div>
+    <div id="thankYou">✅ Thank you! Order submitted.</div>
+    <div id="rejectedMsg">❌ Orders accepted from <b>Sunday 8:00 AM</b> to <b>Saturday 9:00 PM</b>.</div>
   </div>
 
   <script>
     const ratePerKg = 850;
+    const whatsappNumber = "918688014021"; // Replace with your number
+    const googleScriptURL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"; // Replace with your deployed Google Apps Script URL
 
     function getWeekWindow() {
       const now = new Date();
-      const today = now.getDay(); // Sunday = 0, Saturday = 6
+      const today = now.getDay();
+      const start = new Date(now); start.setDate(now.getDate() - today); start.setHours(8, 0, 0, 0); // Sunday 8AM
+      const end = new Date(now); end.setDate(now.getDate() + (6 - today)); end.setHours(21, 0, 0, 0); // Saturday 9PM
+      return { start, end };
+    }
 
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - today);
-      weekStart.setHours(8, 0, 0, 0); // Sunday 8:00 AM
-
-      const daysToSaturday = (6 - today + 7) % 7;
-      const weekEnd = new Date(now);
-      weekEnd.setDate(now.getDate() + daysToSaturday);
-      weekEnd.setHours(21, 0, 0, 0); // Saturday 9:00 PM
-
-      return { weekStart, weekEnd };
+    function generateOrderID() {
+      return 'MM' + Math.floor(100000 + Math.random() * 900000);
     }
 
     window.onload = () => {
       const now = new Date();
-      const { weekStart, weekEnd } = getWeekWindow();
-
+      const { start, end } = getWeekWindow();
       const form = document.getElementById('orderForm');
       const totalSpan = document.getElementById('total');
-      const kgsInput = document.getElementById('kgs');
       const thankYou = document.getElementById('thankYou');
       const rejectedMsg = document.getElementById('rejectedMsg');
       const submitBtn = document.getElementById('submitBtn');
 
-      if (now < weekStart || now > weekEnd) {
+      if (now < start || now > end) {
         submitBtn.disabled = true;
         rejectedMsg.style.display = 'block';
         return;
       }
 
-      kgsInput.addEventListener('input', () => {
-        const qty = parseFloat(kgsInput.value) || 0;
+      document.getElementById('kgs').addEventListener('input', e => {
+        const qty = parseFloat(e.target.value) || 0;
         totalSpan.textContent = (qty * ratePerKg).toFixed(2);
       });
-
-      function generateOrderID() {
-        return 'MM' + Math.floor(100000 + Math.random() * 900000);
-      }
 
       form.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -187,22 +171,29 @@
         const orderID = generateOrderID();
 
         if (!name || !mobile || isNaN(kgs) || !address || !datetime || mobile.length !== 10) {
-          alert('Please fill all required fields correctly.');
+          alert("Please fill all required fields correctly.");
           return;
         }
 
-        let msg = `*M&M Agro Farms Order*\n\nOrder ID: ${orderID}\nName: ${name}\nMobile: ${mobile}\nProduct: Pottel Mutton\nQuantity: ${kgs} Kg\nTotal: ₹${total.toFixed(2)}\nDelivery Address: ${address}\nDate & Time: ${datetime}`;
-        if (message) msg += `\nNote: ${message}`;
+        const msg = `*M&M Agro Farms Order*\nOrder ID: ${orderID}\nName: ${name}\nPhone: ${mobile}\nQty: ${kgs} Kg\nTotal: ₹${total.toFixed(2)}\nAddress: ${address}\nDateTime: ${datetime}${message ? "\nNote: " + message : ""}`;
+        const confirmMsg = msg.replace(/\*/g, '');
+        if (!confirm(`Confirm your order:\n\n${confirmMsg}`)) return;
 
-        const isConfirmed = confirm(`Please confirm your order:\n\n${msg.replace(/\*/g, '')}`);
-        if (isConfirmed) {
-          const url = `https://wa.me/918688014021?text=${encodeURIComponent(msg)}`;
-          window.open(url, '_blank');
+        // ✅ WhatsApp link
+        const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+        window.open(waUrl, '_blank');
 
-          thankYou.style.display = 'block';
-          form.reset();
-          totalSpan.textContent = '0.00';
-        }
+        // ✅ Optional: Send to Google Sheets
+        fetch(googleScriptURL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderID, name, mobile, kgs, total, address, datetime, message })
+        });
+
+        form.reset();
+        totalSpan.textContent = '0.00';
+        thankYou.style.display = 'block';
       });
     };
   </script>
