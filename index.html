@@ -48,18 +48,19 @@
 
 <script>
 const RATE_PER_KG = 850;            // change if needed
-const WEBHOOK_URL = "https://docs.google.com/spreadsheets/d/1Rf6VkkDM9NszrT66QQqEgf3tva2ljlXoHw3m32rMw6g/edit?usp=drive_link"; 
+const WEBHOOK_URL = "https://sheetdb.io/api/v1/pjvv2t9oocng1"; 
 const WHATSAPP = "+918688014021"; 
-
 function nowIsValid() {
   const d = new Date();
   const day = d.getDay(); // 0=Sun,6=Sat
-  const h = d.getHours(), m = d.getMinutes();
+  const h = d.getHours();
 
-  if (day === 6 && (h > 21 || (h === 21 && m > 0))) return false;
-  if (day === 0 && h < 8) return false;
+  if (day === 6 && h >= 21) return false; // Saturday after 9 PM
+  if (day === 0 && h < 7) return false;   // Sunday before 8 AM
   return true;
 }
+
+ 
 
 function generateOrderID() {
   return "MM" + (Math.floor(100000 + Math.random()*900000));
@@ -112,15 +113,20 @@ document.getElementById("orderForm").addEventListener("submit", async function(e
   if (nowIsValid()) {
     // send to Google Sheet
     const data = {orderID,name,mobile,kgs,address,datetime,total,ratePerKg: RATE_PER_KG,message:messageInput};
-    try {
-      await fetch(WEBHOOK_URL, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {"Content-Type": "application/json"}
-      });
-    } catch(err) {
-      console.error("Save failed:", err);
-    }
+
+    // inside if (nowIsValid()) { ... } block
+try {
+  await fetch(WEBHOOK_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ data })
+  });
+} catch(err) {
+  console.error("Save failed:", err);
+}
+
   }
 
   document.getElementById("orderForm").reset();
