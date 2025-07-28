@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>M&M Agro Farms</title>
+
+  <style>
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .offer-blink {
+      animation: blink 1.2s infinite;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0fff0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background-color: #d4edda;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .card h1 {
+      color: #155724;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+
+    .card p {
+      color: #333;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .card button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .card button:hover {
+      background-color: #218838;
+    }
+
+    #orderFormContainer {
+      display: none;
+      width: 100%;
+      max-width: 800px;
+      margin-top: 20px;
+    }
+
+    #orderFrame {
+      width: 100%;
+      height: 700px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ✅ Offer Card -->
+  <div class="card">
+    <div style="text-align: center; margin-bottom: 20px; background-color: #f0fff0; padding: 20px; border-radius: 12px;">
+      <h2 style="color: #1b5e20; font-size: 18px; margin: 0; font-weight: bold;">WELCOME TO</h2>
+      <h1 style="font-size: 26px; color: #0c5c31; font-weight: bold; margin: 5px 0;">M&M AGRO FARMS</h1>
+
+      <div class="offer-blink" style="margin-top: 10px;">
+        <div style="display: inline-block; background-color: #ffcc00; padding: 10px 20px; border-radius: 25px;">
+          <span style="font-size: 14px; font-weight: bold; color: #b30000;">🌟 SPECIAL OFFER: ₹850 Per Kg 🌟</span>
+        </div>
+        <p style="font-weight: bold; color: #d32f2f; font-size: 18px; margin-top: 12px;">💯 100% ORGANIC POTTEL MUTTON 💯</p>
+      </div>
+    </div>
+    <p>🚚 Doorstep Delivery Available within a 5 km Radius of Kompally</p>
+    <button onclick="showOrderForm()">Order Now</button>
+  </div>
+
+  <!-- ✅ Order Form (iframe) -->
+  <div id="orderFormContainer">
+    <iframe id="orderFrame" src=""></iframe>
+  </div>
+
+  <script>
+    function showOrderForm() {
+      document.querySelector('.card').style.display = 'none';
+      document.getElementById('orderFormContainer').style.display = 'block';
+      document.getElementById('orderFrame').src = 'order.html'; // Load the form inside iframe
+    }
+  </script>
+
+</body>
+</html>
