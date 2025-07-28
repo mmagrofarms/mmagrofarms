@@ -1,93 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>M&M Agro Farms</title>
+  <meta charset="UTF-8" />
+  <title>Order - M&M Agro Farms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-    .offer-blink { animation: blink 1.2s infinite; }
     body {
       font-family: Arial, sans-serif;
       background-color: #f0fff0;
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
       min-height: 100vh;
-      margin: 0;
     }
-    .card {
-      background-color: #d4edda;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    .form-container {
+      background: #d4edda;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
       max-width: 400px;
       width: 90%;
+    }
+    .form-container h2 {
+      color: #155724;
       text-align: center;
     }
-    .card button {
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+      color: #155724;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 10px;
       background-color: #28a745;
       color: white;
-      padding: 10px 20px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 20px;
     }
-    .card button:hover {
+    button:hover {
       background-color: #218838;
     }
-    #orderFormContainer {
-      display: none;
-      width: 100%;
-      max-width: 800px;
-      margin-top: 20px;
-    }
-    #orderFrame {
-      width: 100%;
-      height: 700px;
-      border: none;
+    .total-box {
+      margin-top: 10px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
+  <div class="form-container">
+    <h2>Pottel Mutton Order</h2>
+    <form id="orderForm">
+      <label>Name</label>
+      <input type="text" id="name" required />
 
-  <div class="card" id="offerCard">
-    <h2>WELCOME TO</h2>
-    <h1>M&M AGRO FARMS</h1>
-    <div class="offer-blink">
-      <div style="background-color: #ffcc00; padding: 10px 20px; border-radius: 25px;">
-        <span style="font-size: 14px; font-weight: bold; color: #b30000;">🌟 SPECIAL OFFER: ₹850 Per Kg 🌟</span>
-      </div>
-      <p style="color: #d32f2f; font-size: 18px; font-weight: bold;">💯 100% ORGANIC POTTEL MUTTON 💯</p>
-    </div>
-    <p>🚚 Doorstep Delivery Available within a 5 km Radius of Kompally</p>
-    <button onclick="showOrderForm()">Order Now</button>
-  </div>
+      <label>Mobile No</label>
+      <input type="tel" id="mobile" required pattern="\d{10}" maxlength="10" />
 
-  <div id="orderFormContainer">
-    <iframe id="orderFrame"></iframe>
+      <label>Quantity (Kg)</label>
+      <input type="number" id="kgs" required min="0.5" step="0.5" />
+
+      <label>Address</label>
+      <textarea id="address" required></textarea>
+
+      <label>Preferred Date & Time</label>
+      <input type="datetime-local" id="datetime" required />
+
+      <label>Message</label>
+      <textarea id="message" placeholder="Optional notes..."></textarea>
+
+      <div class="total-box">Total: ₹<span id="total">0.00</span></div>
+
+      <button type="submit">Place Order</button>
+    </form>
   </div>
 
   <script>
-    function showOrderForm() {
+    const ratePerKg = 850;
+    const webhookURL = "PASTE_YOUR_SCRIPT_URL_HERE"; // Replace with Apps Script URL
+    const whatsappNumber = "918688014021";
+
+    document.getElementById("kgs").addEventListener("input", () => {
+      const qty = parseFloat(document.getElementById("kgs").value) || 0;
+      document.getElementById("total").textContent = (qty * ratePerKg).toFixed(2);
+    });
+
+    function isOrderTimeValid() {
       const now = new Date();
-      const currentDay = now.getDay(); // Sunday = 0, Monday = 1, ..., Saturday = 6
-      const currentHour = now.getHours();
+      const day = now.getDay(); // 0 = Sunday, 6 = Saturday
+      const hour = now.getHours();
+      const minute = now.getMinutes();
 
-      const isSundayToSaturday = currentDay >= 0 && currentDay <= 6;
-      const isBefore9PM = currentDay !== 6 || (currentDay === 6 && currentHour < 21);
-
-      if (isSundayToSaturday && isBefore9PM) {
-        document.getElementById('offerCard').style.display = 'none';
-        document.getElementById('orderFormContainer').style.display = 'block';
-        document.getElementById('orderFrame').src = 'order.html';
-      } else {
-        alert("⛔ Order rejected: Orders are accepted only from Sunday 8AM to Saturday 9PM.");
-      }
+      if (day === 6 && (hour > 21 || (hour === 21 && minute > 0))) return false;
+      if (day === 0 && hour < 8) return false;
+      return true;
     }
-  </script>
 
+    function generateOrderID() {
+      return "MM" + Math.floor(100000 + Math.random() * 900000);
+    }
+
+    document.getElementById("orderForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim().toUpperCase();
+      const mobile = document.getElementById("mobile").value.trim();
+      const kgs = parseFloat(document.getElementById("kgs").value);
+      const address = document.getElementById("address").value.trim();
+      const datetime = document.getElementById("datetime").value.trim();
+      const message = document.getElementById("message").value.trim();
+      const total = (kgs * ratePerKg).toFixed(2);
+      const orderID = generateOrderID();
+
+      if (!name || !mobile || isNaN(kgs) || !address || !datetime || mobile.length !== 10) {
+        alert("Please fill all fields correctly.");
+        return;
+      }
+
+      let msg;
+      let status;
+
+      if (isOrderTimeValid()) {
+        msg = `✅ *M&M Agro Order Confirmed*\n\nOrder ID: ${orderID}\nName: ${name}\nMobile: ${mobile}\nQty: ${kgs} Kg\nRate: ₹${ratePerKg}/Kg\nTotal: ₹${total}\nAddress: ${address}\nPreferred: ${datetime}${message ? `\nNote: ${message}` : ''}`;
+        status = "Accepted";
+      } else {
+        msg = `❌ *Order Rejected*\n\nDear ${name},\nWe accept orders only from Sunday 8AM to Saturday 9PM.\nPlease try again during this time window.`;
+        status = "Rejected";
+      }
+
+      // WhatsApp
+      const waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+      window.open(waLink, "_blank");
+
+      // Save to Google Sheet only if accepted
+      if (status === "Accepted") {
+        const orderData = {
+          orderID,
+          name,
+          mobile,
+          kgs,
+          address,
+          datetime,
+          total,
+          ratePerKg,
+          message
+        };
+
+        try {
+          await fetch(webhookURL, {
+            method: "POST",
+            body: JSON.stringify(orderData),
+            headers: {
+              "Content-Type": "application/json"
+            }
+          });
+        } catch (error) {
+          console.error("Error saving to sheet:", error);
+        }
+      }
+
+      document.getElementById("orderForm").reset();
+      document.getElementById("total").textContent = "0.00";
+    });
+  </script>
 </body>
 </html>
