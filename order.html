@@ -1,201 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Pottel Mutton Order | M&M Agro Farms</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <title>Order Form - M&M Agro Farms</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f0fff0;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .form-container {
-      background-color: #d4edda;
+      background-color: #f5fff5;
       padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    form {
+      background: #eaffea;
+      padding: 20px;
+      border-radius: 12px;
       max-width: 400px;
-      width: 90%;
-      position: relative;
+      margin: auto;
+      box-shadow: 0 0 10px #ccc;
     }
-    .form-container h2 {
-      color: #155724;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .offer {
-      position: absolute;
-      top: -10px;
-      right: -10px;
-      background-color: #ff6347;
-      color: white;
-      padding: 8px 14px;
-      font-weight: bold;
-      border-radius: 20px;
-      animation: pulse 1.2s infinite;
-      font-size: 14px;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
+
     label {
-      font-weight: bold;
       display: block;
-      margin-top: 10px;
-      color: #155724;
+      margin-bottom: 6px;
+      font-weight: bold;
     }
-    input, textarea {
+
+    input {
       width: 100%;
       padding: 8px;
-      margin-top: 5px;
-      border-radius: 6px;
+      margin-bottom: 16px;
       border: 1px solid #ccc;
+      border-radius: 6px;
     }
+
     button {
-      margin-top: 20px;
-      padding: 10px;
-      width: 100%;
       background-color: #28a745;
       color: white;
+      padding: 10px;
       border: none;
       border-radius: 8px;
-      font-size: 16px;
       cursor: pointer;
+      width: 100%;
     }
-    button:hover {
-      background-color: #218838;
-    }
-    .total-box {
-      margin-top: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      color: #000;
-    }
-    #thankYou, #rejectedMsg {
-      display: none;
-      text-align: center;
+
+    #message {
       margin-top: 20px;
       font-weight: bold;
+      text-align: center;
     }
-    #thankYou { color: green; }
-    #rejectedMsg { color: red; }
   </style>
 </head>
 <body>
-  <div class="form-container" id="formBlock">
-    <div class="offer">Offer: ₹850/Kg</div>
-    <h2>Pottel Mutton Order</h2>
-    <form id="orderForm">
-      <label>Name</label>
-      <input type="text" id="name" required oninput="this.value = this.value.toUpperCase()" />
 
-      <label>Mobile No</label>
-      <input type="tel" id="mobile" maxlength="10" required pattern="\d{10}" />
+  <form id="orderForm">
+    <h2 style="text-align:center;">🛒 Place Your Order</h2>
+    <label for="name">Name:</label>
+    <input type="text" name="name" required>
 
-      <label>Quantity (Kg)</label>
-      <input type="number" id="kgs" required min="0.5" step="0.5" />
+    <label for="phone">Phone Number:</label>
+    <input type="text" name="phone" required>
 
-      <label>Delivery Address</label>
-      <textarea id="address" required></textarea>
+    <label for="quantity">Quantity (in Kg):</label>
+    <input type="number" name="quantity" required min="0.5" step="0.5">
 
-      <label>Preferred Date & Time</label>
-      <input type="datetime-local" id="datetime" required />
+    <button type="submit">Submit Order</button>
+  </form>
 
-      <label>Additional Notes / Message</label>
-      <textarea id="message" placeholder="e.g. Call before delivery..."></textarea>
-
-      <div class="total-box">Total: ₹<span id="total">0.00</span></div>
-
-      <button type="submit" id="submitBtn">Submit via WhatsApp</button>
-    </form>
-
-    <div id="thankYou">✅ Thank you! Order submitted.</div>
-    <div id="rejectedMsg">❌ Orders accepted from <b>Sunday 8:00 AM</b> to <b>Saturday 9:00 PM</b>.</div>
-  </div>
+  <div id="message"></div>
 
   <script>
-    const ratePerKg = 850;
-    const whatsappNumber = "918688014021"; // Replace with your number
-    const googleScriptURL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"; // Replace with your deployed Google Apps Script URL
-
-    function getWeekWindow() {
+    function isOrderTimeValid() {
       const now = new Date();
-      const today = now.getDay();
-      const start = new Date(now); start.setDate(now.getDate() - today); start.setHours(8, 0, 0, 0); // Sunday 8AM
-      const end = new Date(now); end.setDate(now.getDate() + (6 - today)); end.setHours(21, 0, 0, 0); // Saturday 9PM
-      return { start, end };
+      const currentDay = now.getDay(); // Sunday = 0, Saturday = 6
+      const currentHour = now.getHours();
+      const currentMinutes = now.getMinutes();
+
+      if (currentDay === 6 && (currentHour > 21 || (currentHour === 21 && currentMinutes > 0))) {
+        return false; // Saturday after 9 PM
+      }
+
+      if (currentDay === 0 && currentHour < 8) {
+        return false; // Sunday before 8 AM
+      }
+
+      return true; // All other times within valid window
     }
 
-    function generateOrderID() {
-      return 'MM' + Math.floor(100000 + Math.random() * 900000);
-    }
+    document.getElementById("orderForm").addEventListener("submit", function(e) {
+      e.preventDefault();
 
-    window.onload = () => {
-      const now = new Date();
-      const { start, end } = getWeekWindow();
-      const form = document.getElementById('orderForm');
-      const totalSpan = document.getElementById('total');
-      const thankYou = document.getElementById('thankYou');
-      const rejectedMsg = document.getElementById('rejectedMsg');
-      const submitBtn = document.getElementById('submitBtn');
-
-      if (now < start || now > end) {
-        submitBtn.disabled = true;
-        rejectedMsg.style.display = 'block';
+      if (!isOrderTimeValid()) {
+        document.getElementById("message").innerText = "❌ Order rejected: We accept orders only from Sunday 8 AM to Saturday 9 PM.";
         return;
       }
 
-      document.getElementById('kgs').addEventListener('input', e => {
-        const qty = parseFloat(e.target.value) || 0;
-        totalSpan.textContent = (qty * ratePerKg).toFixed(2);
-      });
+      const scriptURL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec"; // Replace this with your actual script URL
+      const form = document.forms["orderForm"];
+      const formData = new FormData(form);
 
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const name = document.getElementById('name').value.trim();
-        const mobile = document.getElementById('mobile').value.trim();
-        const kgs = parseFloat(document.getElementById('kgs').value);
-        const address = document.getElementById('address').value.trim();
-        const datetime = document.getElementById('datetime').value.trim();
-        const message = document.getElementById('message').value.trim();
-        const total = kgs * ratePerKg;
-        const orderID = generateOrderID();
-
-        if (!name || !mobile || isNaN(kgs) || !address || !datetime || mobile.length !== 10) {
-          alert("Please fill all required fields correctly.");
-          return;
-        }
-
-        const msg = `*M&M Agro Farms Order*\nOrder ID: ${orderID}\nName: ${name}\nPhone: ${mobile}\nQty: ${kgs} Kg\nTotal: ₹${total.toFixed(2)}\nAddress: ${address}\nDateTime: ${datetime}${message ? "\nNote: " + message : ""}`;
-        const confirmMsg = msg.replace(/\*/g, '');
-        if (!confirm(`Confirm your order:\n\n${confirmMsg}`)) return;
-
-        // ✅ WhatsApp link
-        const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
-        window.open(waUrl, '_blank');
-
-        // ✅ Optional: Send to Google Sheets
-        fetch(googleScriptURL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderID, name, mobile, kgs, total, address, datetime, message })
+      fetch(scriptURL, { method: 'POST', body: formData })
+        .then(response => {
+          document.getElementById("message").innerText = "✅ Order submitted successfully!";
+          form.reset();
+        })
+        .catch(error => {
+          document.getElementById("message").innerText = "❌ Submission failed. Please try again.";
+          console.error('Error!', error.message);
         });
-
-        form.reset();
-        totalSpan.textContent = '0.00';
-        thankYou.style.display = 'block';
-      });
-    };
+    });
   </script>
+
 </body>
 </html>
