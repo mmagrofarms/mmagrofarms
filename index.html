@@ -1,26 +1,132 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>M&M Agro Farms</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-      body { text-align: center; padding: 50px; font-family: Arial; background: #f0fff0; }
-      h1 { font-size: 2em; color: #2e8b57; }
-      button {
-        padding: 15px 25px;
-        font-size: 18px;
-        background: #28a745;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Welcome to M&M Agro Farms</h1>
-    <p>Fresh Pottel Mutton Orders</p>
-    <a href="order.html"><button>Place Order</button></a>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>M&M Agro Farms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background-color: #f0fff0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .logo {
+      max-width: 120px;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: #2e8b57;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      color: #444;
+      margin-bottom: 20px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .badge {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .badge img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .blink-offer {
+      color: white;
+      background-color: #ff6347;
+      padding: 10px 20px;
+      font-weight: bold;
+      border-radius: 25px;
+      animation: blink 1.2s infinite;
+      margin-bottom: 30px;
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+
+    a button {
+      padding: 14px 24px;
+      font-size: 1rem;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    a button:hover {
+      background-color: #218838;
+    }
+
+    a {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGO -->
+  <img src="https://i.imgur.com/XV7yXsF.png" alt="M&M Agro Logo" class="logo" />
+
+  <!-- TITLE -->
+  <h1>M&M Agro Farms</h1>
+  <div class="tagline">Organic Taste Pottel Mutton</div>
+
+  <!-- SPECIAL OFFER BLINK -->
+  <div class="blink-offer">🔥 Special Offer: ₹850/Kg 🔥</div>
+
+  <!-- BADGES / FEATURES -->
+  <div class="badges">
+    <div class="badge">
+      <img src="https://img.icons8.com/emoji/48/hot-pepper.png" alt="Offer" />
+      Special Offer
+    </div>
+    <div class="badge">
+      <img src="https://img.icons8.com/color/48/organic-food.png" alt="Organic" />
+      100% Organic
+    </div>
+    <div class="badge">
+      <img src="https://img.icons8.com/fluency/48/delivery.png" alt="Delivery" />
+      Home Delivery (within 5 km)
+    </div>
+  </div>
+
+  <!-- ORDER BUTTON -->
+  <a href="order.html"><button>Place Order</button></a>
+</body>
 </html>
+
