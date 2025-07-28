@@ -122,7 +122,7 @@
 
   <script>
     const pricePerKg = 850;
-    const sheetURL = "https://sheetdb.io/api/v1/pjvv2t9oocng1"; // 🔁 Replace with your SheetDB API
+    const sheetURL = "https://sheetdb.io/api/v1/pjvv2t9oocng1"; // Replace with your actual SheetDB API
 
     const form = document.getElementById('orderForm');
     const totalSpan = document.getElementById('total');
@@ -140,6 +140,10 @@
       return !(day === 0 && hour < 6 || day === 6 && hour >= 21);
     }
 
+    function generateOrderID() {
+      return 'MM' + Math.floor(100000 + Math.random() * 900000);
+    }
+
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
 
@@ -150,7 +154,12 @@
       const datetime = document.getElementById('datetime').value.trim();
       const notes = document.getElementById('notes').value.trim();
       const total = quantity * pricePerKg;
-      const orderID = "M&M" + Math.floor(Math.random() * 90000 + 10000);
+      const orderID = generateOrderID();
+
+      if (!name || !mobile || isNaN(quantity) || !address || !datetime || mobile.length !== 10) {
+        alert('Please fill all required fields correctly.');
+        return;
+      }
 
       const selectedDate = new Date(datetime);
       const now = new Date();
@@ -173,7 +182,11 @@
 
       const orderData = {
         data: {
-          name, mobile, quantity, address, datetime,
+          name,
+          mobile,
+          quantity,
+          address,
+          datetime,
           message: notes || "Order Accepted ✅",
           total: total.toFixed(2),
           order_id: orderID
@@ -189,13 +202,14 @@
 
         if (res.ok) {
           responseMsg.innerHTML = `✅ Order Placed! Order ID: ${orderID}<br>Total: ₹${total.toFixed(2)}<br>You'll get WhatsApp confirmation shortly.`;
+
           const waMessage = `Hello ${name}, your order ${orderID} of ${quantity} Kg (₹${total.toFixed(2)}) has been confirmed. Delivery: ${datetime}. Thank you for choosing M&M Agro Farms!`;
           window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent(waMessage)}`, '_blank');
 
           form.reset();
           totalSpan.textContent = '0.00';
         } else {
-          responseMsg.innerHTML = "❌Orders are accepted only from Sunday 6 AM to Saturday 9 PM.";
+          responseMsg.innerHTML = "❌ Failed to save order. Please try again later.";
         }
       } catch (err) {
         console.error(err);
