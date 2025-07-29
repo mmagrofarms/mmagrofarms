@@ -3,64 +3,96 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>M&M Agro Farms – Order Form</title>
+  <title>M&M Agro Order</title>
   <style>
     body {
-      font-family: Arial; background: #f0fff0;
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100vh; margin: 0;
+      font-family: Arial;
+      background: #f0fff0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
     }
     .form-container {
-      background: #d4edda; padding: 20px; border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15); width: 90%; max-width: 460px;
+      background: #d4edda;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      width: 95%;
+      max-width: 460px;
     }
-    .notice {
-      background: #fff3cd; padding: 10px; margin-bottom: 10px;
-      border: 1px solid #ffeeba; border-radius: 6px; color: #856404;
+    h2 {
+      text-align: center;
+      color: #155724;
+      margin-bottom: 15px;
     }
-    h2 { text-align: center; color: #155724; margin-bottom: 20px; }
-    label { font-weight: bold; color: #155724; margin-top: 10px; display: block; }
-    input, select, textarea {
-      width: 100%; padding: 8px; margin-top: 5px; font-size: 14px;
-      border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+    label {
+      font-weight: bold;
+      color: #155724;
+      margin-top: 10px;
+      display: block;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     button {
-      margin-top: 16px; padding: 10px; width: 100%;
-      background: #28a745; color: white; font-size: 16px;
-      border: none; border-radius: 8px; cursor: pointer;
+      margin-top: 16px;
+      padding: 10px;
+      width: 100%;
+      background: #28a745;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
     }
-    button:hover { background: #218838; }
     .total-box {
-      margin-top: 10px; font-weight: bold; font-size: 16px; color: #000;
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      color: #000;
     }
     .message {
-      margin-top: 20px; color: #155724; font-weight: bold;
+      margin-top: 20px;
+      color: #155724;
+      font-weight: bold;
+    }
+    .order-copy {
+      width: 100%;
+      resize: vertical;
+      font-family: monospace;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    #shareButton {
+      background: #25d366;
     }
   </style>
 </head>
 <body>
-
 <div class="form-container">
-  <div class="notice" id="noticeBox">🔄 Loading rates and info...</div>
-  <h2>Place Your Order</h2>
-
+  <h2>M&M Agro Farms Order</h2>
   <form id="orderForm">
-    <label for="product">Select Product</label>
-    <select id="product" required>
-      <option value="" disabled selected>-- Choose --</option>
-      <option value="mutton">Mutton</option>
-      <option value="chicken">Dressed Desi Chicken</option>
-      <option value="egg">Desi Eggs</option>
-    </select>
-
-    <label for="quantity">Quantity (Kg / Nos)</label>
-    <input type="number" id="quantity" required min="0.5" step="0.5">
-
     <label for="name">Name</label>
     <input type="text" id="name" required oninput="this.value = this.value.toUpperCase()">
-
+    
     <label for="mobile">Mobile No</label>
     <input type="tel" id="mobile" maxlength="10" pattern="\d{10}" required>
+
+    <label for="muttonQty">Mutton Quantity (Kg)</label>
+    <input type="number" id="muttonQty" min="0" step="0.5" placeholder="0">
+
+    <label for="chickenQty">Desi Chicken Quantity (Kg)</label>
+    <input type="number" id="chickenQty" min="0" step="0.5" placeholder="0">
+
+    <label for="eggQty">Desi Eggs (No. of Eggs)</label>
+    <input type="number" id="eggQty" min="0" step="1" placeholder="0">
 
     <label for="address">Delivery Address</label>
     <textarea id="address" required></textarea>
@@ -72,127 +104,126 @@
     <textarea id="notes" placeholder="e.g. Call before delivery..."></textarea>
 
     <div class="total-box">Total: ₹<span id="total">0.00</span></div>
-
     <button type="submit">Submit Order</button>
   </form>
 
   <div class="message" id="responseMsg"></div>
+  <button id="shareButton" style="display:none;">📤 Share Order via WhatsApp</button>
 </div>
 
 <script>
-  const scriptURL = 'YOUR_DEPLOYED_SCRIPT_URL_HERE'; // <-- Replace with your Web App URL
+  let rateMutton = 850;
+  let rateChicken = 550;
+  let rateEgg = 13;
   const ownerWhatsApp = "918688014021";
 
-  let prices = { mutton: 850, chicken: 550, egg: 13 };
-  let notice = "";
-  let limits = { mutton: 100, chicken: 20 };
-  let totals = { mutton: 0, chicken: 0 };
-
-  async function loadSettings() {
-    const res = await fetch(`${scriptURL}?action=getSettings`);
+  async function fetchRates() {
+    const res = await fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=getSettings");
     const data = await res.json();
-    prices = {
-      mutton: parseFloat(data.mutton_price),
-      chicken: parseFloat(data.chicken_price),
-      egg: parseFloat(data.egg_price)
-    };
-    notice = data.customer_notice || "";
-    document.getElementById("noticeBox").innerText =
-      `📢 ${notice} \n Mutton ₹${prices.mutton}/kg, Chicken ₹${prices.chicken}/kg, Egg ₹${prices.egg}/each`;
+    rateMutton = data.rateMutton;
+    rateChicken = data.rateChicken;
+    rateEgg = data.rateEgg;
   }
 
-  async function loadTotals() {
-    const res = await fetch(`${scriptURL}?action=getTotals`);
-    totals = await res.json();
+  fetchRates();
+
+  const form = document.getElementById("orderForm");
+  const totalSpan = document.getElementById("total");
+  const shareBtn = document.getElementById("shareButton");
+  const responseMsg = document.getElementById("responseMsg");
+  let orderDetails = "", orderID = "";
+
+  function calcTotal() {
+    const m = parseFloat(document.getElementById("muttonQty").value) || 0;
+    const c = parseFloat(document.getElementById("chickenQty").value) || 0;
+    const e = parseInt(document.getElementById("eggQty").value) || 0;
+    const total = m * rateMutton + c * rateChicken + e * rateEgg;
+    totalSpan.textContent = total.toFixed(2);
+    return total;
   }
 
-  function updateTotal() {
-    const product = document.getElementById("product").value;
-    const qty = parseFloat(document.getElementById("quantity").value) || 0;
-    const total = prices[product] * qty;
-    document.getElementById("total").innerText = total.toFixed(2);
-  }
-
-  document.getElementById("product").addEventListener("change", updateTotal);
-  document.getElementById("quantity").addEventListener("input", updateTotal);
-
-  function isCutoffReached() {
-    const now = new Date();
-    const day = now.getDay(); // 6 = Saturday
-    const hour = now.getHours();
-    return (day === 6 && hour >= 21);
-  }
+  form.querySelectorAll("input").forEach(input => {
+    input.addEventListener("input", calcTotal);
+  });
 
   function generateOrderID() {
     return "MM" + Math.floor(100000 + Math.random() * 900000);
   }
 
-  document.getElementById("orderForm").addEventListener("submit", async function(e) {
+  form.addEventListener("submit", async function(e) {
     e.preventDefault();
 
-    await loadTotals(); // Refresh live quantities
-
-    const product = document.getElementById("product").value;
-    const qty = parseFloat(document.getElementById("quantity").value);
-    const name = document.getElementById("name").value.trim();
+    const name = nameField.value = document.getElementById("name").value.trim();
     const mobile = document.getElementById("mobile").value.trim();
+    const m = parseFloat(document.getElementById("muttonQty").value) || 0;
+    const c = parseFloat(document.getElementById("chickenQty").value) || 0;
+    const e = parseInt(document.getElementById("eggQty").value) || 0;
     const address = document.getElementById("address").value.trim();
     const datetime = document.getElementById("datetime").value.trim();
     const notes = document.getElementById("notes").value.trim();
-    const total = qty * prices[product];
+    const total = calcTotal();
 
-    if (!product || !qty || !name || mobile.length !== 10 || !address || !datetime) {
+    if (!name || !mobile || mobile.length !== 10 || !address || !datetime) {
       alert("Please fill all fields correctly.");
       return;
     }
 
-    // Stock limit check
-    if ((product === "mutton" && totals.mutton + qty > limits.mutton) ||
-        (product === "chicken" && totals.chicken + qty > limits.chicken)) {
-      document.getElementById("responseMsg").innerHTML = `❌ Sorry, ${product} stock limit reached.`;
+    const now = new Date();
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() + ((6 - cutoff.getDay() + 7) % 7)); // Saturday
+    cutoff.setHours(21, 0, 0, 0);
+
+    if (now > cutoff) {
+      responseMsg.innerHTML = "⛔ Orders are closed after Saturday 9 PM.";
       return;
     }
 
-    // Cutoff check
-    if (isCutoffReached()) {
-      document.getElementById("responseMsg").innerHTML = `⛔ Orders closed after Saturday 9 PM.`;
-      return;
-    }
+    orderID = generateOrderID();
 
-    const orderID = generateOrderID();
-    const orderText =
-`*🌿 M&M Agro Farms – Order Confirmation*
+    orderDetails = 
+`*🌿 M&M Agro Order*
 🆔 Order ID: ${orderID}
 👤 Name: ${name}
 📞 Mobile: +91${mobile}
-🍖 Product: ${product}
-📦 Quantity: ${qty} ${product === 'egg' ? 'Nos' : 'Kg'}
+🐐 Mutton: ${m} Kg
+🐓 Chicken: ${c} Kg
+🥚 Eggs: ${e} nos
 💰 Total: ₹${total.toFixed(2)}
 📍 Address: ${address}
 🕓 Delivery: ${datetime}
-📝 Notes: ${notes || 'None'}
+📝 Notes: ${notes || "None"}
 ✅ Thank you for choosing us!`;
 
-    // Save to Google Sheet
-    await fetch(scriptURL, {
-      method: 'POST',
-      body: JSON.stringify({ name, mobile, product, quantity: qty, total, address, datetime, notes })
+    if (!confirm("Please confirm your order:\n\n" + orderDetails.replace(/\*/g, ""))) return;
+
+    // Send to Google Sheet
+    await fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", {
+      method: "POST",
+      body: new FormData(form)
     });
 
-    // Send WhatsApp to customer
-    window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent(orderText)}`, "_blank");
+    // Send to Admin
+    window.open(`https://wa.me/${ownerWhatsApp}?text=${encodeURIComponent(orderDetails)}`, "_blank");
 
-    // Send alert to admin
-    window.open(`https://wa.me/${ownerWhatsApp}?text=${encodeURIComponent("📢 New Order Received:\n" + orderText)}`, "_blank");
+    // Send to Customer
+    window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent(orderDetails)}`, "_blank");
 
-    document.getElementById("responseMsg").innerHTML = `✅ Order placed successfully. Confirmation sent via WhatsApp.`;
-    e.target.reset();
-    document.getElementById("total").innerText = "0.00";
+    responseMsg.innerHTML = `
+      ✅ Order submitted!<br><br>
+      Save or share your order below:<br>
+      <textarea class="order-copy" rows="8" readonly>${orderDetails}</textarea>
+    `;
+    shareBtn.style.display = "block";
+    form.reset();
+    calcTotal();
   });
 
-  // Init
-  loadSettings();
+  shareBtn.addEventListener("click", () => {
+    const shareTo = prompt("Enter WhatsApp number (91...):", "91");
+    if (shareTo) {
+      window.open(`https://wa.me/${shareTo}?text=${encodeURIComponent(orderDetails)}`, "_blank");
+    }
+  });
 </script>
-
 </body>
 </html>
