@@ -144,15 +144,15 @@
 
       const encodedMessage = encodeURIComponent(message);
 
-      // Open WhatsApp for the customer and automatically redirect to the chat
+      // Open WhatsApp for the customer (in a new tab)
       window.open(`https://wa.me/91${mobile}?text=${encodedMessage}`, '_blank');
 
-      // Send a copy to the admin without asking the user for confirmation
+      // Send a copy to the admin without asking the user for confirmation (in a new tab)
       setTimeout(function() {
         window.open(`https://wa.me/918688014021?text=${encodedMessage}`, '_blank');
       }, 500);
 
-      // Clear form and show success message
+      // Success message and reset form
       alert("Order submitted successfully! You will now be redirected to WhatsApp.");
       document.getElementById("orderForm").reset();
       calculateTotal();
