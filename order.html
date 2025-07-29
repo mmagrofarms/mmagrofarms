@@ -9,17 +9,21 @@
       font-family: Arial, sans-serif;
       padding: 20px;
       background-color: #f5f5f5;
+      text-align: center;
     }
     h2 {
       color: #2e7d32;
+      font-size: 36px;
+      margin-bottom: 20px;
     }
-    form {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 500px;
-      margin: auto;
+    .order-form {
+      background-color: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: left;
     }
     label {
       display: block;
@@ -28,25 +32,26 @@
     }
     input, select, textarea {
       width: 100%;
-      padding: 8px;
-      margin-top: 5px;
+      padding: 10px;
+      margin-top: 8px;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 6px;
     }
     #totalAmount {
-      font-size: 18px;
+      font-size: 20px;
       margin-top: 20px;
       color: #d32f2f;
       font-weight: bold;
     }
     button {
-      margin-top: 20px;
+      margin-top: 25px;
       background-color: #388e3c;
       color: #fff;
-      padding: 10px;
+      padding: 12px;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 18px;
     }
     button:hover {
       background-color: #2e7d32;
@@ -54,35 +59,38 @@
   </style>
 </head>
 <body>
+
   <h2>🌿 M&M Agro Farms – Pottel Mutton Order</h2>
-  <form id="orderForm">
-    <label for="name">👤 Name:</label>
-    <input type="text" id="name" name="name" required>
+  <div class="order-form">
+    <form id="orderForm">
+      <label for="name">👤 Name:</label>
+      <input type="text" id="name" name="name" required>
 
-    <label for="mobile">📞 Mobile:</label>
-    <input type="tel" id="mobile" name="mobile" required>
+      <label for="mobile">📞 Mobile:</label>
+      <input type="tel" id="mobile" name="mobile" required>
 
-    <label for="mutton">Mutton (₹850/kg):</label>
-    <input type="number" id="mutton" name="mutton" min="0" value="0">
+      <label for="mutton">Mutton (₹850/kg):</label>
+      <input type="number" id="mutton" name="mutton" min="0" value="0" step="0.1">
 
-    <label for="chicken">Desi Chicken (₹550/kg):</label>
-    <input type="number" id="chicken" name="chicken" min="0" value="0">
+      <label for="chicken">Desi Chicken (₹550/kg):</label>
+      <input type="number" id="chicken" name="chicken" min="0" value="0" step="0.1">
 
-    <label for="eggs">Desi Eggs (₹13 each):</label>
-    <input type="number" id="eggs" name="eggs" min="0" value="0">
+      <label for="eggs">Desi Eggs (₹13 each):</label>
+      <input type="number" id="eggs" name="eggs" min="0" value="0" step="1">
 
-    <label for="address">📍 Address:</label>
-    <textarea id="address" name="address" required></textarea>
+      <label for="address">📍 Address:</label>
+      <textarea id="address" name="address" required></textarea>
 
-    <label for="delivery">🕓 Delivery Date & Time:</label>
-    <input type="datetime-local" id="delivery" name="delivery" required>
+      <label for="delivery">🕓 Delivery Date & Time:</label>
+      <input type="datetime-local" id="delivery" name="delivery" required>
 
-    <label for="notes">📝 Notes (Optional):</label>
-    <textarea id="notes" name="notes"></textarea>
+      <label for="notes">📝 Notes (Optional):</label>
+      <textarea id="notes" name="notes"></textarea>
 
-    <div id="totalAmount">💰 Total: ₹0.00</div>
-    <button type="submit">Submit Order</button>
-  </form>
+      <div id="totalAmount">💰 Total: ₹0.00</div>
+      <button type="submit">Submit Order</button>
+    </form>
+  </div>
 
   <script>
     const prices = {
@@ -136,16 +144,20 @@
 
       const encodedMessage = encodeURIComponent(message);
 
-      // Send to customer
+      // Open WhatsApp for the customer and automatically redirect to the chat
       window.open(`https://wa.me/91${mobile}?text=${encodedMessage}`, '_blank');
 
-      // Send copy to admin
-      window.open(`https://wa.me/918688014021?text=${encodedMessage}`, '_blank');
+      // Send a copy to the admin without asking the user for confirmation
+      setTimeout(function() {
+        window.open(`https://wa.me/918688014021?text=${encodedMessage}`, '_blank');
+      }, 500);
 
-      alert("Order submitted successfully!");
+      // Clear form and show success message
+      alert("Order submitted successfully! You will now be redirected to WhatsApp.");
       document.getElementById("orderForm").reset();
       calculateTotal();
     });
   </script>
+
 </body>
 </html>
