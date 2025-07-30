@@ -4,13 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard – M&M Agro Farms</title>
-<script>
-  // Block unauthorized access
-  if (localStorage.getItem("isLoggedIn") !== "true") {
-    window.location.href = "login.html";
-  }
-  // The rest of your admin script goes here...
-</script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
@@ -27,7 +20,7 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    input[type="date"], input[type="text"] {
+    input[type="date"], input[type="text"], input[type="number"] {
       padding: 6px;
       border-radius: 4px;
       border: 1px solid #ccc;
@@ -62,14 +55,20 @@
     td.toggle {
       text-align: center;
     }
-    #superLogPanel {
+    #superLogPanel, #rateCardSection {
       display: none;
       margin-top: 40px;
     }
   </style>
+  <script>
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      window.location.href = "login.html";
+    }
+  </script>
 </head>
 <body>
   <h2>📋 Admin Dashboard – M&M Agro Farms</h2>
+  <button onclick="logout()" style="float:right; margin:10px;">🚪 Logout</button>
 
   <div class="filters">
     <label for="dateFilter">📅 Filter by date:</label>
@@ -100,6 +99,19 @@
     <tbody></tbody>
   </table>
 
+  <div id="rateCardSection">
+    <h2>📌 Today’s Rate Card</h2>
+    <div class="super-log-controls">
+      <label>Mutton (₹/kg):</label>
+      <input type="number" id="rateMutton" />
+      <label>Chicken (₹/kg):</label>
+      <input type="number" id="rateChicken" />
+      <label>Egg (₹/piece):</label>
+      <input type="number" id="rateEgg" />
+      <button onclick="updateRateCard()">Save Rates</button>
+    </div>
+  </div>
+
   <div id="superLogPanel">
     <h2>🕵️ Admin Access Logs</h2>
     <div class="super-log-controls">
@@ -122,134 +134,36 @@
   <script>
     const ordersKey = "orders";
     const logsKey = "accessLogs";
-    const prices = { mutton: 850, chicken: 550, egg: 13 };
+    const rateKey = "todayRates";
+
+    let prices = JSON.parse(localStorage.getItem(rateKey) || '{"mutton":850,"chicken":550,"egg":13}');
     let allOrders = [];
 
-    function loadOrders(filteredDate = null) {
-      const tableBody = document.querySelector("#ordersTable tbody");
-      tableBody.innerHTML = "";
-      allOrders = JSON.parse(localStorage.getItem(ordersKey) || "[]");
-      const usedIds = new Set();
-
-      allOrders.forEach(order => {
-        if (usedIds.has(order.orderId)) return;
-        usedIds.add(order.orderId);
-
-        if (filteredDate && order.orderDate !== filteredDate) return;
-
-        const total = (order.mQty * prices.mutton) + (order.cQty * prices.chicken) + (order.eQty * prices.egg);
-
-        const row = tableBody.insertRow();
-        row.innerHTML = `
-          <td>${order.orderId}</td>
-          <td>${order.name}</td>
-          <td>${order.mobile}</td>
-          <td>${order.mQty}</td>
-          <td>${order.cQty}</td>
-          <td>${order.eQty}</td>
-          <td>${total}</td>
-          <td>${order.orderDate}</td>
-          <td>${order.orderTime}</td>
-          <td>${order.deliveryDate}</td>
-          <td>${order.address}</td>
-          <td>${order.notes || "-"}</td>
-          <td class="toggle">
-            <input type="checkbox" ${order.delivered ? "checked" : ""} onchange="toggleDelivery('${order.orderId}', this.checked)" />
-          </td>
-        `;
-      });
-    }
-
-    function filterByDate() {
-      const selectedDate = document.getElementById("dateFilter").value;
-      if (selectedDate) {
-        loadOrders(selectedDate);
-      }
-    }
-
-    function toggleDelivery(orderId, status) {
-      const orders = JSON.parse(localStorage.getItem(ordersKey) || "[]");
-      const index = orders.findIndex(o => o.orderId === orderId);
-      if (index !== -1) {
-        orders[index].delivered = status;
-        localStorage.setItem(ordersKey, JSON.stringify(orders));
-        console.log(`Delivery status for ${orderId} updated to ${status}`);
-      }
-    }
-
-    function exportToExcel() {
-      const rows = [["Order ID", "Name", "Mobile", "Mutton", "Chicken", "Eggs", "Total", "Order Date", "Order Time", "Delivery", "Address", "Notes", "Delivered"]];
-      const tableRows = document.querySelectorAll("#ordersTable tbody tr");
-
-      tableRows.forEach(tr => {
-        const cells = Array.from(tr.children).map(td => {
-          return td.querySelector("input") ? (td.querySelector("input").checked ? "Yes" : "No") : td.textContent;
-        });
-        rows.push(cells);
-      });
-
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Orders");
-      XLSX.writeFile(wb, `M&M_Orders_${new Date().toISOString().split("T")[0]}.xlsx`);
-    }
-
-    function logAccess(action = "Viewed") {
-      const mobile = localStorage.getItem("adminMobile") || "Unknown";
-      const now = new Date();
-      const entry = {
-        date: now.toISOString().split("T")[0],
-        time: now.toTimeString().split(" ")[0],
-        mobile: mobile,
-        action: action,
-        location: localStorage.getItem("userLocation") || "N/A"
+    function updateRateCard() {
+      prices = {
+        mutton: parseFloat(document.getElementById("rateMutton").value),
+        chicken: parseFloat(document.getElementById("rateChicken").value),
+        egg: parseFloat(document.getElementById("rateEgg").value)
       };
-      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
-      logs.push(entry);
-      localStorage.setItem(logsKey, JSON.stringify(logs));
+      localStorage.setItem(rateKey, JSON.stringify(prices));
+      alert("Rate card updated.");
+      loadOrders();
     }
 
-    function loadLogs() {
-      const logBody = document.querySelector("#logTable tbody");
-      logBody.innerHTML = "";
-      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
-      logs.forEach(log => {
-        const row = logBody.insertRow();
-        row.innerHTML = `
-          <td>${log.date}</td>
-          <td>${log.time}</td>
-          <td>${log.mobile}</td>
-          <td>${log.action}</td>
-          <td>${log.location}</td>
-        `;
-      });
+    function loadRateCard() {
+      document.getElementById("rateMutton").value = prices.mutton;
+      document.getElementById("rateChicken").value = prices.chicken;
+      document.getElementById("rateEgg").value = prices.egg;
     }
 
-    function exportLogsToExcel() {
-      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
-      const rows = [["Date", "Time", "Mobile", "Action", "Location"]];
-      logs.forEach(log => rows.push([log.date, log.time, log.mobile, log.action, log.location]));
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Logs");
-      XLSX.writeFile(wb, `Admin_Access_Logs_${new Date().toISOString().split("T")[0]}.xlsx`);
-    }
-
-    // Secret trigger
     document.addEventListener("keydown", function (e) {
-      if (e.ctrlKey && e.shiftKey && e.key === "##") {
-        const panel = document.getElementById("superLogPanel");
-        panel.style.display = panel.style.display === "none" ? "block" : "none";
+      if (e.ctrlKey && e.shiftKey && e.key === "L") {
+        document.getElementById("superLogPanel").style.display = "block";
+        document.getElementById("rateCardSection").style.display = "block";
         loadLogs();
+        loadRateCard();
       }
     });
-
-    window.onload = () => {
-      const today = new Date().toISOString().split("T")[0];
-      document.getElementById("dateFilter").value = today;
-      loadOrders();
-      logAccess("Visited Admin Page");
-    };
   </script>
 </body>
 </html>
