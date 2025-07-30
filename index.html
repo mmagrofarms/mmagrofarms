@@ -17,6 +17,28 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
+      position: relative;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+    }
+
+    .admin-link {
+      font-weight: bold;
+      background-color: #FFEB3B;
+      color: #1B5E20;
+      padding: 8px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .admin-link:hover {
+      background-color: #fdd835;
     }
 
     .logo {
@@ -57,7 +79,7 @@
     }
 
     .badge img {
-background-color:#FBCEB1;
+      background-color:#FBCEB1;
       width: 20px;
       height: 20px;
     }
@@ -100,32 +122,32 @@ background-color:#FBCEB1;
   </style>
 </head>
 <body>
+
+  <!-- TOP-RIGHT ADMIN LOGIN LINK -->
+  <div class="top-bar">
+    <a href="login.html" class="admin-link">🔒 Admin Login</a>
+  </div>
+
   <!-- LOGO -->
   <img src="logo.jpg" alt="M&M Agro Farms Logo" class="logo" />
 
   <!-- TITLE -->
   <h1>M&M Agro Farms</h1>
-  <div class="tagline">Organic Taste Pottel Mutton, Desi  Chicken </div>
+  <div class="tagline">Organic Taste Pottel Mutton, Desi Chicken</div>
 
   <!-- SPECIAL OFFER BLINK -->
-  <div class="blink-offer">🔥 Launching Offer: Mutton @ ₹850/Kg, Desi Chicken @ ₹550/Kg  🔥</div>
+  <div class="blink-offer">🔥 Launching Offer: Mutton @ ₹850/Kg, Desi Chicken @ ₹550/Kg 🔥</div>
 
   <!-- BADGES / FEATURES -->
   <div class="badges">
-    
     <div class="badge">
       <img src="https://img.icons8.com/fluency/48/delivery.png" alt="Delivery" />
-      <b>We Offer Home Delivery Within a 5 km Radius of Kompally @ Hyderabad & Karimnagar</B>
+      <b>We Offer Home Delivery Within a 5 km Radius of Kompally @ Hyderabad & Karimnagar</b>
     </div>
   </div>
-</div>
-</div>
-<p style="text-align: center; margin-top: 30px;">
-  🔒 <a href="login.html" style="color: #2e7d32;">Admin Login</a>
-</p>
 
   <!-- ORDER BUTTON -->
   <a href="order.html"><button>Place Order</button></a>
+
 </body>
 </html>
-
