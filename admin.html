@@ -2,75 +2,75 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin – M&M Orders Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard – M&M Agro Farms</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9fbe7;
       padding: 20px;
+      background-color: #f4f7f8;
     }
     h2 {
       text-align: center;
-      color: #33691e;
+      color: #2e7d32;
+      margin-bottom: 10px;
     }
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      flex-wrap: wrap;
+    .filters {
+      text-align: center;
       margin-bottom: 20px;
     }
-    .controls input, .controls button {
-      padding: 8px;
-      font-size: 14px;
+    input[type="date"] {
+      padding: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 16px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1b5e20;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      background: white;
+      margin-top: 15px;
     }
     th, td {
+      border: 1px solid #ddd;
       padding: 8px;
-      border: 1px solid #ccc;
+      text-align: left;
       font-size: 14px;
-      text-align: center;
     }
     th {
-      background-color: #dcedc8;
+      background-color: #a5d6a7;
     }
-    td[data-toggle="delivery"] {
-      cursor: pointer;
-      color: white;
-      font-weight: bold;
-    }
-    .delivered {
-      background-color: #2e7d32;
-    }
-    .pending {
-      background-color: #c62828;
+    td.toggle {
+      text-align: center;
     }
   </style>
 </head>
 <body>
+  <h2>📋 Admin Dashboard – M&M Agro Farms</h2>
 
-  <h2>📋 M&M Agro – Admin Dashboard</h2>
-
-  <div class="controls">
-    <label>
-      📅 Filter by Order Date:
-      <input type="date" id="filterDate">
-    </label>
-    <button onclick="loadOrders()">🔄 Show All</button>
-    <button onclick="exportToExcel()">📤 Export to Excel</button>
+  <div class="filters">
+    <label for="dateFilter">📅 Filter by date:</label>
+    <input type="date" id="dateFilter" />
+    <button onclick="filterByDate()">Filter</button>
+    <button onclick="loadOrders()">Show All</button>
+    <button onclick="exportToExcel()">Export to Excel</button>
   </div>
 
   <table id="ordersTable">
     <thead>
       <tr>
         <th>Order ID</th>
-        <th>Time</th>
         <th>Name</th>
         <th>Mobile</th>
         <th>Mutton</th>
@@ -78,112 +78,94 @@
         <th>Eggs</th>
         <th>Total (₹)</th>
         <th>Order Date</th>
-        <th>Delivery Date</th>
+        <th>Order Time</th>
+        <th>Delivery</th>
         <th>Address</th>
         <th>Notes</th>
-        <th>Status</th>
+        <th>Delivered</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
   <script>
-    function loadOrders() {
-      const tbody = document.querySelector("#ordersTable tbody");
-      tbody.innerHTML = "";
+    const ordersKey = "orders";
+    let allOrders = [];
 
-      const allOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-      const filterDate = document.getElementById("filterDate").value;
+    function loadOrders(filteredDate = null) {
+      const tableBody = document.querySelector("#ordersTable tbody");
+      tableBody.innerHTML = "";
+      allOrders = JSON.parse(localStorage.getItem(ordersKey) || "[]");
 
-      const filteredOrders = filterDate
-        ? allOrders.filter(o => o.orderDate === filterDate)
-        : allOrders;
+      const usedIds = new Set(); // Prevent duplicates
+      allOrders.forEach(order => {
+        if (usedIds.has(order.orderId)) return;
+        usedIds.add(order.orderId);
 
-      if (filteredOrders.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;">No orders found</td></tr>`;
-        return;
-      }
+        if (filteredDate && order.orderDate !== filteredDate) return;
 
-      filteredOrders.forEach(order => {
-        const row = document.createElement("tr");
+        const row = tableBody.insertRow();
         row.innerHTML = `
           <td>${order.orderId}</td>
-          <td>${order.orderTime}</td>
           <td>${order.name}</td>
           <td>${order.mobile}</td>
-          <td>${order.mQty} kg</td>
-          <td>${order.cQty} kg</td>
+          <td>${order.mQty}</td>
+          <td>${order.cQty}</td>
           <td>${order.eQty}</td>
-          <td>₹${order.total}</td>
+          <td>${order.total}</td>
           <td>${order.orderDate}</td>
+          <td>${order.orderTime}</td>
           <td>${order.deliveryDate}</td>
           <td>${order.address}</td>
           <td>${order.notes || "-"}</td>
-          <td data-toggle="delivery" class="${order.delivered ? 'delivered' : 'pending'}">
-            ${order.delivered ? "Delivered" : "Pending"}
+          <td class="toggle">
+            <input type="checkbox" ${order.delivered ? "checked" : ""} 
+              onchange="toggleDelivery('${order.orderId}', this.checked)" />
           </td>
         `;
-
-        // Toggle delivery status
-        row.querySelector("[data-toggle='delivery']").addEventListener("click", () => {
-          const index = allOrders.findIndex(o => o.orderId === order.orderId);
-          allOrders[index].delivered = !allOrders[index].delivered;
-          localStorage.setItem("orders", JSON.stringify(allOrders));
-          loadOrders();
-        });
-
-        tbody.appendChild(row);
       });
     }
 
-    function exportToExcel() {
-      const allOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-      const filterDate = document.getElementById("filterDate").value;
-
-      const filteredOrders = filterDate
-        ? allOrders.filter(o => o.orderDate === filterDate)
-        : allOrders;
-
-      if (filteredOrders.length === 0) {
-        alert("❌ No orders to export!");
-        return;
+    function filterByDate() {
+      const selectedDate = document.getElementById("dateFilter").value;
+      if (selectedDate) {
+        loadOrders(selectedDate);
       }
-
-      const uniqueOrders = [];
-      const seen = new Set();
-      for (const order of filteredOrders) {
-        if (!seen.has(order.orderId)) {
-          seen.add(order.orderId);
-          uniqueOrders.push(order);
-        }
-      }
-
-      const worksheet = XLSX.utils.json_to_sheet(
-        uniqueOrders.map(o => ({
-          "Order ID": o.orderId,
-          "Name": o.name,
-          "Mobile": o.mobile,
-          "Mutton (kg)": o.mQty,
-          "Chicken (kg)": o.cQty,
-          "Eggs": o.eQty,
-          "Total (₹)": o.total,
-          "Order Date": o.orderDate,
-          "Order Time": o.orderTime,
-          "Delivery Date": o.deliveryDate,
-          "Address": o.address,
-          "Notes": o.notes || "",
-          "Status": o.delivered ? "Delivered" : "Pending"
-        }))
-      );
-
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
-      const date = new Date().toISOString().split("T")[0];
-      XLSX.writeFile(workbook, `M&M_Orders_${filterDate || date}.xlsx`);
     }
 
-    // Load orders on page load
-    window.onload = loadOrders;
+    function toggleDelivery(orderId, status) {
+      const orders = JSON.parse(localStorage.getItem(ordersKey) || "[]");
+      const index = orders.findIndex(o => o.orderId === orderId);
+      if (index !== -1) {
+        orders[index].delivered = status;
+        localStorage.setItem(ordersKey, JSON.stringify(orders));
+        console.log(`Delivery status for ${orderId} updated to ${status}`);
+      }
+    }
+
+    function exportToExcel() {
+      const rows = [["Order ID", "Name", "Mobile", "Mutton", "Chicken", "Eggs", "Total", "Order Date", "Order Time", "Delivery", "Address", "Notes", "Delivered"]];
+      const tableRows = document.querySelectorAll("#ordersTable tbody tr");
+
+      tableRows.forEach(tr => {
+        const cells = Array.from(tr.children).map(td => {
+          return td.querySelector("input") ? (td.querySelector("input").checked ? "Yes" : "No") : td.textContent;
+        });
+        rows.push(cells);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Orders");
+      XLSX.writeFile(wb, `M&M_Orders_${new Date().toISOString().split("T")[0]}.xlsx`);
+    }
+
+    // Load all on page load
+    window.onload = () => {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("dateFilter").value = today;
+      loadOrders();
+    };
   </script>
 </body>
 </html>
