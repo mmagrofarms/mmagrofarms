@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Login – M&M Agro Farms</title>
+  <title>Secure Admin OTP Login – M&M Agro Farms</title>
   <style>
     body {
       background-color: #f0f4f8;
@@ -22,16 +22,13 @@
     }
     h2 {
       text-align: center;
-      margin-bottom: 20px;
       color: #2e7d32;
-    }
-    label {
-      font-weight: bold;
+      margin-bottom: 20px;
     }
     input {
       width: 100%;
       padding: 10px;
-      margin: 8px 0 16px;
+      margin: 10px 0;
       border: 1px solid #ccc;
       border-radius: 6px;
     }
@@ -45,48 +42,132 @@
       font-size: 16px;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #1b5e20;
-    }
     .error {
       color: red;
       text-align: center;
+      margin-top: 10px;
+    }
+    .timer {
+      text-align: center;
+      color: #555;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
   <div class="login-box">
-    <h2>Admin Login</h2>
-    <form id="loginForm">
-      <label for="username">Username:</label>
-      <input type="text" id="username" required />
+    <h2>Admin OTP Login</h2>
+    <input type="tel" id="mobile" placeholder="Enter admin mobile number" required />
+    <button onclick="sendOTP()">Send OTP via WhatsApp</button>
 
-      <label for="password">Password:</label>
-      <input type="password" id="password" required />
-
-      <button type="submit">Login</button>
-    </form>
+    <div style="margin-top: 20px;">
+      <input type="text" id="otpInput" placeholder="Enter OTP received" />
+      <button onclick="verifyOTP()">Login</button>
+    </div>
+    <p class="timer" id="timerText"></p>
     <p class="error" id="errorMsg"></p>
   </div>
 
   <script>
-    const adminUsername = "admin";
-    const adminPassword = "mmfarms2025";
+    const allowedAdmins = ["9059269504", "7569429670"]; // ✅ Add authorized mobile numbers
+    let generatedOTP = "";
+    let expiryTime = null;
+    let attemptCount = 0;
+    const maxAttempts = 3;
+    let countdownInterval;
 
-    document.getElementById("loginForm").addEventListener("submit", function (e) {
-      e.preventDefault();
+    function sendOTP() {
+      const mobile = document.getElementById("mobile").value.trim();
+      const errorMsg = document.getElementById("errorMsg");
+      const timerText = document.getElementById("timerText");
+      errorMsg.textContent = "";
+      timerText.textContent = "";
 
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
+      if (!/^\d{10}$/.test(mobile)) {
+        errorMsg.textContent = "❌ Enter a valid 10-digit mobile number.";
+        return;
+      }
+
+      if (!allowedAdmins.includes(mobile)) {
+        errorMsg.textContent = "❌ This mobile number is not authorized.";
+        return;
+      }
+
+      generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+      expiryTime = Date.now() + 3 * 60 * 1000; // 2 minutes
+      attemptCount = 0;
+
+      const message = `🛡️ Your M&M Agro Farms Admin OTP is: *${generatedOTP}*\nValid for 3 minutes.`;
+      const whatsappURL = `https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappURL, "_blank");
+
+      startCountdown();
+    }
+
+    function startCountdown() {
+      const timerText = document.getElementById("timerText");
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        const now = Date.now();
+        const remaining = expiryTime - now;
+        if (remaining <= 0) {
+          timerText.textContent = "❌ OTP expired. Please request a new one.";
+          clearInterval(countdownInterval);
+          generatedOTP = "";
+        } else {
+          const seconds = Math.floor((remaining % 60000) / 1000);
+          const minutes = Math.floor((remaining / 60000));
+          timerText.textContent = `⏳ OTP expires in ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+        }
+      }, 1000);
+    }
+
+    function verifyOTP() {
+      const entered = document.getElementById("otpInput").value.trim();
+      const mobile = document.getElementById("mobile").value.trim();
       const errorMsg = document.getElementById("errorMsg");
 
-      if (username === adminUsername && password === adminPassword) {
+      if (!generatedOTP) {
+        errorMsg.textContent = "❌ No valid OTP. Please request again.";
+        return;
+      }
+
+      if (Date.now() > expiryTime) {
+        errorMsg.textContent = "❌ OTP has expired.";
+        generatedOTP = "";
+        return;
+      }
+
+      if (entered === generatedOTP) {
+        // ✅ Save login time
+        const now = new Date();
+        const formatted = now.toLocaleString("en-IN", {
+          day: "2-digit", month: "short", year: "numeric",
+          hour: "2-digit", minute: "2-digit", hour12: true
+        });
+        const loginRecord = { mobile, time: formatted };
+        const logs = JSON.parse(localStorage.getItem("adminLogins") || "[]");
+        logs.push(loginRecord);
+        localStorage.setItem("adminLogins", JSON.stringify(logs));
+
+        // ✅ Send login alert via WhatsApp
+        const alertMsg = `✅ Admin logged in on: ${formatted}\n📱 Mobile: ${mobile}`;
+        const alertURL = `https://wa.me/91${mobile}?text=${encodeURIComponent(alertMsg)}`;
+        window.open(alertURL, "_blank");
+
         localStorage.setItem("isLoggedIn", "true");
         window.location.href = "admin.html";
       } else {
-        errorMsg.textContent = "❌ Invalid username or password!";
+        attemptCount++;
+        if (attemptCount >= maxAttempts) {
+          errorMsg.textContent = "❌ Too many incorrect attempts. Please request a new OTP.";
+          generatedOTP = "";
+          clearInterval(countdownInterval);
+        } else {
+          errorMsg.textContent = `❌ Incorrect OTP. ${maxAttempts - attemptCount} attempt(s) left.`;
+        }
       }
-    });
+    }
   </script>
 </body>
 </html>
