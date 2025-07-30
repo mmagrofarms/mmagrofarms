@@ -16,8 +16,7 @@
       display: inline-block;
       padding: 8px 12px;
       border-radius: 4px;
-      animation: blink-bg 1s steps(1, start) infinite,
-                 blink-color 1s steps(1, start) infinite;
+      animation: blink-bg 1s steps(1, start) infinite, blink-color 1s steps(1, start) infinite;
     }
 
     @keyframes blink-bg {
@@ -94,8 +93,8 @@
   </style>
 </head>
 <body>
-  <h1>🌿 M&M Agro Farms 🌿</h2>
-  <h4 class="blink-sunday">Delivery available only on Sundays.Orders accepted until Saturday 9:00 PM.</h4>
+  <h2>🌿 M&M Agro Farms 🌿</h2>
+  <h3 class="blink-sunday">Delivery available only on Sundays. Orders accepted until Saturday 9:00 PM.</h3>
 
   <div class="order-form">
     <form id="orderForm">
@@ -147,9 +146,7 @@
       return total;
     }
 
-    [muttonEl, chickenEl, eggsEl].forEach(i =>
-      i.addEventListener("input", calculateTotal)
-    );
+    [muttonEl, chickenEl, eggsEl].forEach(i => i.addEventListener("input", calculateTotal));
 
     function getNextSunday() {
       const today = new Date();
@@ -187,8 +184,8 @@
 
       const now = new Date();
       const orderCutoff = new Date();
-      orderCutoff.setDate(orderCutoff.getDate() + ((6 - orderCutoff.getDay() + 7) % 7)); // Saturday
-      orderCutoff.setHours(21, 0, 0, 0); // 9 PM
+      orderCutoff.setDate(orderCutoff.getDate() + ((6 - orderCutoff.getDay() + 7) % 7));
+      orderCutoff.setHours(21, 0, 0, 0); // Saturday 9 PM
 
       if (now > orderCutoff) {
         alert("🚫 Orders after Saturday 9:00 PM are not accepted for Sunday delivery.");
@@ -224,11 +221,16 @@
         `✅ Thank you for choosing M&M Agro Farms!`;
 
       const encoded = encodeURIComponent(message);
-      window.open(`https://wa.me/91${mobile}?text=${encoded}`, '_blank');
-      setTimeout(() => window.open(`https://wa.me/918688014021?text=${encoded}`, '_blank'), 500);
-      alert("✅ Order submitted! Redirecting to WhatsApp.");
-      this.reset();
-      calculateTotal();
+
+      // First send to company
+      window.open(`https://wa.me/918688014021?text=${encoded}`, '_blank');
+
+      // Then send to customer
+      setTimeout(() => {
+        window.open(`https://wa.me/91${mobile}?text=${encoded}`, '_blank');
+      }, 800);
+
+      alert("✅ Order submitted! Confirmation message sent via WhatsApp.");
     });
   </script>
 </body>
