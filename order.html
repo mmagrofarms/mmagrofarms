@@ -264,20 +264,26 @@
       calculateTotal();
     });
 
-    // Close and Reopen logic
-    document.getElementById("closeFormBtn").addEventListener("click", () => {
-      formContainer.style.opacity = "0";
-      setTimeout(() => {
-        formContainer.style.display = "none";
-        reopenFormBtn.style.display = "inline-block";
-      }, 300);
-    });
+   <!-- Close Button -->
+<button id="closeFormBtn">❌ Close</button>
 
-    reopenFormBtn.addEventListener("click", () => {
-      formContainer.style.display = "block";
-      setTimeout(() => formContainer.style.opacity = "1", 10);
-      reopenFormBtn.style.display = "none";
-    });
+<script>
+  document.getElementById("closeFormBtn").addEventListener("click", () => {
+    // Confirm with the user before exiting
+    if (confirm("Are you sure you want to exit the order form?")) {
+      // Try to close the tab (works only if the tab was opened by JS)
+      window.open('', '_self');
+      window.close();
+
+      // Fallback: Show exit message
+      document.body.innerHTML = `
+        <h2 style="text-align:center; color:gray; margin-top: 50px;">
+          ✅ You have exited the order form.<br>Thank you!
+        </h2>
+      `;
+    }
+  });
+</script>
   </script>
 </body>
 </html>
