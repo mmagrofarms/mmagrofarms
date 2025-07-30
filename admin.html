@@ -52,9 +52,6 @@
     th {
       background-color: #a5d6a7;
     }
-    td.toggle {
-      text-align: center;
-    }
     #superLogPanel, #rateCardSection {
       display: none;
       margin-top: 40px;
@@ -93,7 +90,6 @@
         <th>Delivery Date</th>
         <th>Address</th>
         <th>Notes</th>
-        <th>Delivered</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -156,6 +152,52 @@
       document.getElementById("rateEgg").value = prices.egg;
     }
 
+    function getOrders() {
+      return JSON.parse(localStorage.getItem(ordersKey) || "[]");
+    }
+
+    function renderTable(data) {
+      const tbody = document.querySelector("#ordersTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(order => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${order.orderID}</td>
+          <td>${order.name}</td>
+          <td>${order.mobile}</td>
+          <td>${order.muttonKg || 0}</td>
+          <td>${order.chickenKg || 0}</td>
+          <td>${order.eggs || 0}</td>
+          <td>₹${order.total?.toFixed(2) || "0.00"}</td>
+          <td>${order.orderDate || ""}</td>
+          <td>${order.orderTime || ""}</td>
+          <td>${order.deliveryDate || ""}</td>
+          <td>${order.address}</td>
+          <td>${order.notes || ""}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function loadOrders() {
+      allOrders = getOrders();
+      renderTable(allOrders);
+    }
+
+    function filterByDate() {
+      const date = document.getElementById("dateFilter").value;
+      if (!date) return;
+      const filtered = allOrders.filter(o => o.deliveryDate === date);
+      renderTable(filtered);
+    }
+
+    function exportToExcel() {
+      const ws = XLSX.utils.table_to_sheet(document.getElementById("ordersTable"));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Orders");
+      XLSX.writeFile(wb, "orders.xlsx");
+    }
+
     function logout() {
       const mobile = localStorage.getItem("adminMobile") || "unknown";
       const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
@@ -170,7 +212,7 @@
 
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          (pos) => {
+          pos => {
             logEntry.location = `Lat: ${pos.coords.latitude.toFixed(4)}, Long: ${pos.coords.longitude.toFixed(4)}`;
             logs.push(logEntry);
             localStorage.setItem(logsKey, JSON.stringify(logs));
@@ -186,7 +228,7 @@
           }
         );
       } else {
-        logEntry.location = "Location not supported";
+        logEntry.location = "Not supported";
         logs.push(logEntry);
         localStorage.setItem(logsKey, JSON.stringify(logs));
         localStorage.removeItem("isLoggedIn");
@@ -194,6 +236,15 @@
       }
     }
 
+    function exportLogsToExcel() {
+      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
+      const worksheet = XLSX.utils.json_to_sheet(logs);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Access Logs");
+      XLSX.writeFile(workbook, "admin-access-logs.xlsx");
+    }
+
+    // Ctrl+Shift+L to show hidden admin logs + rates
     document.addEventListener("keydown", function (e) {
       if (e.ctrlKey && e.shiftKey && e.key === "L") {
         document.getElementById("superLogPanel").style.display = "block";
@@ -219,13 +270,7 @@
       });
     }
 
-    function exportLogsToExcel() {
-      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
-      const worksheet = XLSX.utils.json_to_sheet(logs);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Access Logs");
-      XLSX.writeFile(workbook, "admin-access-logs.xlsx");
-    }
+    window.onload = loadOrders;
   </script>
 </body>
 </html>
