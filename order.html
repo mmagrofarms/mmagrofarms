@@ -9,151 +9,139 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
+      margin: 0;
       background-color: #f5f5f5;
-      text-align: center;
-    }
-
-    .blink-sunday {
-      display: inline-block;
-      padding: 8px 12px;
-      border-radius: 4px;
-      animation: blink-bg 1s steps(1, start) infinite, blink-color 1s steps(1, start) infinite;
-    }
-
-    @keyframes blink-bg {
-      0%, 50% { background-color: #FFEB3B; }
-      51%, 100% { background-color: #F8BBD0; }
-    }
-
-    @keyframes blink-color {
-      0%, 50% { color: #2e7d32; }
-      51%, 100% { color: #880E4F; }
     }
 
     h2 {
+      text-align: center;
       color: #2e7d32;
-      font-size: 36px;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
 
     h5 {
-      color: #FFB6C1;
+      text-align: center;
+      color: #FF4081;
       margin-bottom: 20px;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+      100% { opacity: 1; }
     }
 
     .order-form {
-      background-color: #e0f2f1;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
-      margin: 0 auto;
-      text-align: left;
-      transition: opacity 0.3s ease;
+      max-width: 500px;
+      margin: auto;
+      background: #e0f2f1;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
     }
 
     label {
       display: block;
-      margin-top: 15px;
+      margin-top: 12px;
       font-weight: bold;
     }
 
     input, textarea {
       width: 100%;
-      padding: 10px;
-      margin-top: 8px;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 6px;
     }
 
     input[readonly] {
-      background-color: #f0f0f0;
-      color: #555;
+      background: #f0f0f0;
     }
 
     #totalAmount {
-      font-size: 20px;
-      margin-top: 20px;
+      margin-top: 15px;
+      font-size: 18px;
       color: #d32f2f;
       font-weight: bold;
     }
 
     button {
-      margin-top: 25px;
-      background-color: #388e3c;
-      color: #000;
-      padding: 12px;
+      margin-top: 18px;
+      padding: 10px;
+      width: 48%;
       border: none;
       border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
-      font-size: 18px;
     }
 
-    button:hover {
-      background-color: #2e7d32;
+    #submitBtn {
+      background-color: #4CAF50;
+      color: white;
     }
 
     #closeFormBtn {
       background-color: #d32f2f;
-      margin-left: 10px;
-    }
-
-    #closeFormBtn:hover {
-      background-color: #b71c1c;
-    }
-
-    #reopenFormBtn {
-      display: none;
-      margin-top: 30px;
-      background-color: #0288d1;
       color: white;
+      float: right;
     }
 
-    #reopenFormBtn:hover {
-      background-color: #0277bd;
+    @media screen and (max-width: 480px) {
+      .order-form {
+        padding: 15px;
+      }
+
+      button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      #closeFormBtn {
+        float: none;
+      }
     }
   </style>
 </head>
 <body>
   <h2>🌿 M&M Agro Farms 🌿</h2>
-  <h5 class="blink-sunday">Delivery available only on Sundays. Orders accepted until Saturday 9:00 PM.</h5>
+  <h5>Delivery on Sunday only • Orders accepted until Saturday 9:00 PM</h5>
 
-  <div class="order-form" id="formContainer">
+  <div class="order-form">
     <form id="orderForm">
-      <label for="name">👤 Name:</label>
-      <input type="text" id="name" name="name" required />
+      <label>Name</label>
+      <input type="text" id="name" required />
 
-      <label for="mobile">📞 Mobile:</label>
-      <input type="tel" id="mobile" name="mobile" required />
+      <label>Mobile</label>
+      <input type="tel" id="mobile" required />
 
-      <label for="mutton">📦 Mutton (₹850/kg):</label>
-      <input type="number" id="mutton" name="mutton" min="0" value="0" step="0.001" />
+      <label>Mutton (₹850/kg)</label>
+      <input type="number" id="mutton" min="0" value="0" step="0.001" />
 
-      <label for="chicken">📦 Desi Chicken (₹550/kg):</label>
-      <input type="number" id="chicken" name="chicken" min="0" value="0" step="0.001" />
+      <label>Desi Chicken (₹550/kg)</label>
+      <input type="number" id="chicken" min="0" value="0" step="0.001" />
 
-      <label for="eggs">🥚 Desi Eggs (₹13 each):</label>
-      <input type="number" id="eggs" name="eggs" min="0" value="0" step="1" />
+      <label>Desi Eggs (₹13 each)</label>
+      <input type="number" id="eggs" min="0" value="0" step="1" />
 
-      <label for="orderDate">📅 Order Date:</label>
-      <input type="date" id="orderDate" name="orderDate" required />
+      <label>Order Date</label>
+      <input type="date" id="orderDate" readonly />
 
-      <label for="deliveryDate">🗓️ Delivery Date (Auto-set to Next Sunday):</label>
+      <label>Delivery Date</label>
       <input type="text" id="deliveryDate" readonly />
 
-      <label for="address">📍 Address:</label>
-      <textarea id="address" name="address" required></textarea>
+      <label>Address</label>
+      <textarea id="address" required></textarea>
 
-      <label for="notes">📝 Notes (Optional):</label>
-      <textarea id="notes" name="notes"></textarea>
+      <label>Notes (optional)</label>
+      <textarea id="notes"></textarea>
 
       <div id="totalAmount">💰 Total: ₹0.00</div>
-      <button type="submit">Submit Order</button>
-      <button type="button" id="closeFormBtn">Close</button>
+
+      <button id="submitBtn" type="submit">Submit</button>
+      <button id="closeFormBtn" type="button">Close</button>
     </form>
   </div>
-
-  <button id="reopenFormBtn">📝 Reopen Order Form</button>
 
   <script>
     const prices = { mutton: 850, chicken: 550, eggs: 13 };
@@ -161,9 +149,6 @@
     const chickenEl = document.getElementById("chicken");
     const eggsEl = document.getElementById("eggs");
     const totalEl = document.getElementById("totalAmount");
-    const formEl = document.getElementById("orderForm");
-    const formContainer = document.getElementById("formContainer");
-    const reopenFormBtn = document.getElementById("reopenFormBtn");
 
     function calculateTotal() {
       const total =
@@ -174,50 +159,56 @@
       return total;
     }
 
-    [muttonEl, chickenEl, eggsEl].forEach(i => i.addEventListener("input", calculateTotal));
+    [muttonEl, chickenEl, eggsEl].forEach(i =>
+      i.addEventListener("input", calculateTotal)
+    );
 
     function getNextSunday() {
       const today = new Date();
       const diff = (7 - today.getDay()) % 7 || 7;
-      const next = new Date(today.getFullYear(), today.getMonth(), today.getDate() + diff);
-      return next;
+      const nextSunday = new Date(today);
+      nextSunday.setDate(today.getDate() + diff);
+      return nextSunday;
     }
 
     function formatDate(date) {
       return date.toLocaleDateString("en-IN", {
-        weekday: "long",
-        year: "numeric",
-        month: "short",
-        day: "numeric"
-      });
+        year: "numeric", month: "2-digit", day: "2-digit"
+      }).split("/").reverse().join("-");
     }
 
-    function formatDateTime(date) {
-      return date.toLocaleString("en-IN", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
+    function formatDisplay(date) {
+      return date.toLocaleDateString("en-IN", {
+        weekday: "long", year: "numeric", month: "short", day: "numeric"
       });
     }
 
     window.onload = () => {
+      const today = new Date();
       const nextSunday = getNextSunday();
-      document.getElementById("deliveryDate").value = formatDate(nextSunday);
+
+      // Show only this coming Sunday
+      const orderDateInput = document.getElementById("orderDate");
+      orderDateInput.value = formatDate(nextSunday);
+      orderDateInput.min = formatDate(nextSunday);
+      orderDateInput.max = formatDate(nextSunday);
+
+      document.getElementById("deliveryDate").value = formatDisplay(nextSunday);
       calculateTotal();
     };
 
-    formEl.addEventListener("submit", function(e) {
+    document.getElementById("orderForm").addEventListener("submit", function(e) {
       e.preventDefault();
 
       const now = new Date();
-      const orderCutoff = new Date();
-      orderCutoff.setDate(orderCutoff.getDate() + ((6 - orderCutoff.getDay() + 7) % 7));
-      orderCutoff.setHours(21, 0, 0, 0);
+      const nextSunday = getNextSunday();
 
-      if (now > orderCutoff) {
-        alert("🚫 Orders after Saturday 9:00 PM are not accepted for Sunday delivery.");
+      const cutoff = new Date(nextSunday);
+      cutoff.setDate(cutoff.getDate() - 1); // Saturday
+      cutoff.setHours(21, 0, 0, 0); // 9:00 PM
+
+      if (now > cutoff) {
+        alert("🚫 Orders are not accepted after Saturday 9 PM for this Sunday's delivery.");
         return;
       }
 
@@ -227,58 +218,45 @@
       const cQty = parseFloat(chickenEl.value || 0);
       const eQty = parseFloat(eggsEl.value || 0);
       const orderDate = document.getElementById("orderDate").value;
-      const orderTime = formatDateTime(now);
-      const deliveryDate = document.getElementById("deliveryDate").value;
       const address = document.getElementById("address").value;
       const notes = document.getElementById("notes").value;
       const total = calculateTotal();
       const orderId = `MM${Math.floor(100000 + Math.random() * 900000)}`;
+      const deliveryDate = document.getElementById("deliveryDate").value;
 
-      const message =
-        `🌿 M&M Agro Farms 🌿\n` +
-        `🆔 Order ID: ${orderId}\n` +
-        `👤 Name: ${name}\n` +
-        `📞 Mobile: ${mobile}\n` +
-        `📦 Qty: ${mQty} kg Mutton, ${cQty} kg Chicken, ${eQty} Eggs\n` +
-        `💰 Total: ₹${total.toFixed(2)}\n` +
-        `📍 Address: ${address}\n` +
-        `📅 Order Date: ${orderDate}\n` +
-        `⏰ Order Time: ${orderTime}\n` +
-        `🚚 Delivery Date: ${deliveryDate}\n` +
-        `📝 Notes: ${notes || "-"}\n` +
-        `✅ Thank you for choosing M&M Agro Farms!`;
+      const orderTime = new Date().toLocaleString("en-IN");
 
-      const encoded = encodeURIComponent(message);
-      window.open(`https://wa.me/918688014021?text=${encoded}`, '_blank');
+      const order = {
+        orderId, name, mobile, mQty, cQty, eQty, total, orderDate, orderTime,
+        deliveryDate, address, notes, delivered: false
+      };
+
+      const message = 
+        `🌿 M&M Agro Farms 🌿\n🆔 ${orderId}\n👤 ${name}\n📞 ${mobile}\n` +
+        `📦 ${mQty}kg Mutton, ${cQty}kg Chicken, ${eQty} Eggs\n💰 ₹${total.toFixed(2)}\n` +
+        `📍 ${address}\n📅 ${orderDate}\n⏰ ${orderTime}\n🚚 ${deliveryDate}\n` +
+        `📝 ${notes || "-"}`;
+
+      // WhatsApp link
+      window.open(`https://wa.me/918688014021?text=${encodeURIComponent(message)}`, "_blank");
       setTimeout(() => {
-        window.open(`https://wa.me/91${mobile}?text=${encoded}`, '_blank');
+        window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`, "_blank");
       }, 800);
 
-      const orderData = [
-        ["Order ID", "Name", "Mobile", "Mutton (kg)", "Chicken (kg)", "Eggs", "Total", "Order Date", "Order Time", "Delivery Date", "Address", "Notes"],
-        [orderId, name, mobile, mQty, cQty, eQty, total.toFixed(2), orderDate, orderTime, deliveryDate, address, notes]
-      ];
+      // Store in localStorage
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      orders.push(order);
+      localStorage.setItem("orders", JSON.stringify(orders));
 
-      const ws = XLSX.utils.aoa_to_sheet(orderData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Orders");
-      XLSX.writeFile(wb, `MM-Order-${orderId}.xlsx`);
+      alert("✅ Order submitted and stored!");
 
-      alert("✅ Order submitted! Confirmation message sent via WhatsApp.");
-
-      formEl.reset();
+      this.reset();
       calculateTotal();
     });
 
     document.getElementById("closeFormBtn").addEventListener("click", () => {
-      if (confirm("Are you sure you want to exit the order form?")) {
-        window.open('', '_self');
-        window.close();
-        document.body.innerHTML = `
-          <h2 style="text-align:center; color:gray; margin-top: 50px;">
-            ✅ You have exited the order form.<br>Thank you!
-          </h2>
-        `;
+      if (confirm("Exit the order form?")) {
+        document.body.innerHTML = `<h2 style="text-align:center; margin-top: 60px; color: gray;">✅ Order form closed.<br>Thank you!</h2>`;
       }
     });
   </script>
