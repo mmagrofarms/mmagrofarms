@@ -2,150 +2,113 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>M&M Agro – Order Form</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard – M&M Agro Farms</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
+      background: #f1f8e9;
       padding: 20px;
-      text-align: center;
     }
     h2 {
+      text-align: center;
       color: #2e7d32;
     }
-    table {
+    form {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    input, textarea, button, select {
+      display: block;
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background-color: #e0f2f1;
-    }
-    .filter {
-      margin-bottom: 20px;
+      margin-bottom: 12px;
+      padding: 10px;
+      font-size: 16px;
     }
     button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #388e3c;
+      background: #388e3c;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
     }
     button:hover {
-      background-color: #2e7d32;
-    }
-    input[type="date"] {
-      padding: 8px;
+      background: #2e7d32;
     }
   </style>
 </head>
 <body>
-  <h2>📊 Admin Dashboard – M&M Agro Farms</h2>
-  <div class="filter">
-    <label for="filterDate">📅 Filter by Order Date:</label>
-    <input type="date" id="filterDate" />
-    <button onclick="loadOrders()">🔄 Refresh</button>
-  </div>
-  <table id="ordersTable">
-    <thead>
-      <tr>
-        <th>Order ID</th>
-        <th>Name</th>
-        <th>Mobile</th>
-        <th>Mutton</th>
-        <th>Chicken</th>
-        <th>Eggs</th>
-        <th>Total</th>
-        <th>Order Date</th>
-        <th>Delivery Date</th>
-        <th>Address</th>
-        <th>Delivered</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <button onclick="exportToExcel()">📤 Export to Excel</button>
+  <h2>🐐 M&M Agro Order Form</h2>
+  <form id="orderForm">
+    <input type="text" id="name" placeholder="Your Name" required />
+    <input type="tel" id="mobile" placeholder="Mobile Number" required />
+    <input type="text" id="address" placeholder="Address" required />
+    <input type="number" id="mQty" placeholder="Mutton (kg)" min="0" step="0.001" />
+    <input type="number" id="cQty" placeholder="Chicken (kg)" min="0" step="0.001" />
+    <input type="number" id="eQty" placeholder="Eggs (pcs)" min="0" />
+    <input type="date" id="deliveryDate" required />
+    <textarea id="notes" placeholder="Notes (optional)"></textarea>
+    <button type="submit">📦 Place Order</button>
+  </form>
 
   <script>
-    // Sample orders from localStorage
-    function getOrders() {
-      return JSON.parse(localStorage.getItem("mm_orders") || "[]");
-    }
+    const MUTTON_RATE = 800;
+    const CHICKEN_RATE = 250;
+    const EGG_RATE = 6;
 
-    function loadOrders() {
-      const tbody = document.querySelector("#ordersTable tbody");
-      tbody.innerHTML = "";
+    // Prevent selecting past or future dates (only this week)
+    const deliveryInput = document.getElementById("deliveryDate");
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const date = String(today.getDate()).padStart(2, '0');
+    deliveryInput.setAttribute("min", `${year}-${month}-${date}`);
 
-      const filterDate = document.getElementById("filterDate").value;
-      const orders = getOrders();
-      orders.forEach((order, i) => {
-        if (filterDate && order.orderDate !== filterDate) return;
+    document.getElementById("orderForm").addEventListener("submit", function (e) {
+      e.preventDefault();
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${order.orderId}</td>
-          <td>${order.name}</td>
-          <td>${order.mobile}</td>
-          <td>${order.mutton}</td>
-          <td>${order.chicken}</td>
-          <td>${order.eggs}</td>
-          <td>₹${order.total}</td>
-          <td>${order.orderDate}</td>
-          <td>${order.deliveryDate}</td>
-          <td>${order.address}</td>
-          <td><input type="checkbox" ${order.delivered ? "checked" : ""} onchange="toggleDelivery(${i})" /></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+      const name = document.getElementById("name").value.trim();
+      const mobile = document.getElementById("mobile").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const mQty = parseFloat(document.getElementById("mQty").value) || 0;
+      const cQty = parseFloat(document.getElementById("cQty").value) || 0;
+      const eQty = parseInt(document.getElementById("eQty").value) || 0;
+      const deliveryDate = document.getElementById("deliveryDate").value;
+      const notes = document.getElementById("notes").value.trim();
 
-    function toggleDelivery(index) {
-      const orders = getOrders();
-      orders[index].delivered = !orders[index].delivered;
-      localStorage.setItem("mm_orders", JSON.stringify(orders));
-      loadOrders();
-    }
+      const total = (mQty * MUTTON_RATE) + (cQty * CHICKEN_RATE) + (eQty * EGG_RATE);
+      const orderTime = new Date().toLocaleTimeString();
+      const orderDate = new Date().toISOString().split("T")[0];
 
-    function exportToExcel() {
-      const orders = getOrders();
-      const filtered = document.getElementById("filterDate").value;
-      const data = [
-        ["Order ID", "Name", "Mobile", "Mutton", "Chicken", "Eggs", "Total", "Order Date", "Delivery Date", "Address", "Delivered"]
-      ];
-      orders.forEach(order => {
-        if (filtered && order.orderDate !== filtered) return;
-        data.push([
-          order.orderId,
-          order.name,
-          order.mobile,
-          order.mutton,
-          order.chicken,
-          order.eggs,
-          order.total,
-          order.orderDate,
-          order.deliveryDate,
-          order.address,
-          order.delivered ? "Yes" : "No"
-        ]);
-      });
-      const ws = XLSX.utils.aoa_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Orders");
-      XLSX.writeFile(wb, `MM-Orders-${filtered || "All"}.xlsx`);
-    }
+      const orderId = `ORD${Date.now()}`;
 
-    // Load on page
-    loadOrders();
+      const order = {
+        orderId,
+        name,
+        mobile,
+        address,
+        mQty,
+        cQty,
+        eQty,
+        total,
+        deliveryDate,
+        orderDate,
+        orderTime,
+        notes,
+        delivered: false
+      };
+
+      const existing = JSON.parse(localStorage.getItem("orders") || "[]");
+      existing.push(order);
+      localStorage.setItem("orders", JSON.stringify(existing));
+
+      alert("✅ Order placed successfully!");
+      this.reset();
+    });
   </script>
 </body>
 </html>
