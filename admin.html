@@ -2,113 +2,188 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>M&M Agro – Order Form</title>
+  <title>Admin – M&M Orders Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f1f8e9;
+      background: #f9fbe7;
       padding: 20px;
     }
     h2 {
       text-align: center;
-      color: #2e7d32;
+      color: #33691e;
     }
-    form {
-      max-width: 500px;
-      margin: 0 auto;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
     }
-    input, textarea, button, select {
-      display: block;
+    .controls input, .controls button {
+      padding: 8px;
+      font-size: 14px;
+    }
+    table {
       width: 100%;
-      margin-bottom: 12px;
-      padding: 10px;
-      font-size: 16px;
+      border-collapse: collapse;
+      background: white;
     }
-    button {
-      background: #388e3c;
-      color: white;
-      border: none;
-      border-radius: 4px;
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      text-align: center;
+    }
+    th {
+      background-color: #dcedc8;
+    }
+    td[data-toggle="delivery"] {
       cursor: pointer;
+      color: white;
+      font-weight: bold;
     }
-    button:hover {
-      background: #2e7d32;
+    .delivered {
+      background-color: #2e7d32;
+    }
+    .pending {
+      background-color: #c62828;
     }
   </style>
 </head>
 <body>
-  <h2>🐐 M&M Agro Order Form</h2>
-  <form id="orderForm">
-    <input type="text" id="name" placeholder="Your Name" required />
-    <input type="tel" id="mobile" placeholder="Mobile Number" required />
-    <input type="text" id="address" placeholder="Address" required />
-    <input type="number" id="mQty" placeholder="Mutton (kg)" min="0" step="0.001" />
-    <input type="number" id="cQty" placeholder="Chicken (kg)" min="0" step="0.001" />
-    <input type="number" id="eQty" placeholder="Eggs (pcs)" min="0" />
-    <input type="date" id="deliveryDate" required />
-    <textarea id="notes" placeholder="Notes (optional)"></textarea>
-    <button type="submit">📦 Place Order</button>
-  </form>
+
+  <h2>📋 M&M Agro – Admin Dashboard</h2>
+
+  <div class="controls">
+    <label>
+      📅 Filter by Order Date:
+      <input type="date" id="filterDate">
+    </label>
+    <button onclick="loadOrders()">🔄 Show All</button>
+    <button onclick="exportToExcel()">📤 Export to Excel</button>
+  </div>
+
+  <table id="ordersTable">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Time</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Mutton</th>
+        <th>Chicken</th>
+        <th>Eggs</th>
+        <th>Total (₹)</th>
+        <th>Order Date</th>
+        <th>Delivery Date</th>
+        <th>Address</th>
+        <th>Notes</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
   <script>
-    const MUTTON_RATE = 800;
-    const CHICKEN_RATE = 250;
-    const EGG_RATE = 6;
+    function loadOrders() {
+      const tbody = document.querySelector("#ordersTable tbody");
+      tbody.innerHTML = "";
 
-    // Prevent selecting past or future dates (only this week)
-    const deliveryInput = document.getElementById("deliveryDate");
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const date = String(today.getDate()).padStart(2, '0');
-    deliveryInput.setAttribute("min", `${year}-${month}-${date}`);
+      const allOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+      const filterDate = document.getElementById("filterDate").value;
 
-    document.getElementById("orderForm").addEventListener("submit", function (e) {
-      e.preventDefault();
+      const filteredOrders = filterDate
+        ? allOrders.filter(o => o.orderDate === filterDate)
+        : allOrders;
 
-      const name = document.getElementById("name").value.trim();
-      const mobile = document.getElementById("mobile").value.trim();
-      const address = document.getElementById("address").value.trim();
-      const mQty = parseFloat(document.getElementById("mQty").value) || 0;
-      const cQty = parseFloat(document.getElementById("cQty").value) || 0;
-      const eQty = parseInt(document.getElementById("eQty").value) || 0;
-      const deliveryDate = document.getElementById("deliveryDate").value;
-      const notes = document.getElementById("notes").value.trim();
+      if (filteredOrders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;">No orders found</td></tr>`;
+        return;
+      }
 
-      const total = (mQty * MUTTON_RATE) + (cQty * CHICKEN_RATE) + (eQty * EGG_RATE);
-      const orderTime = new Date().toLocaleTimeString();
-      const orderDate = new Date().toISOString().split("T")[0];
+      filteredOrders.forEach(order => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${order.orderId}</td>
+          <td>${order.orderTime}</td>
+          <td>${order.name}</td>
+          <td>${order.mobile}</td>
+          <td>${order.mQty} kg</td>
+          <td>${order.cQty} kg</td>
+          <td>${order.eQty}</td>
+          <td>₹${order.total}</td>
+          <td>${order.orderDate}</td>
+          <td>${order.deliveryDate}</td>
+          <td>${order.address}</td>
+          <td>${order.notes || "-"}</td>
+          <td data-toggle="delivery" class="${order.delivered ? 'delivered' : 'pending'}">
+            ${order.delivered ? "Delivered" : "Pending"}
+          </td>
+        `;
 
-      const orderId = `ORD${Date.now()}`;
+        // Toggle delivery status
+        row.querySelector("[data-toggle='delivery']").addEventListener("click", () => {
+          const index = allOrders.findIndex(o => o.orderId === order.orderId);
+          allOrders[index].delivered = !allOrders[index].delivered;
+          localStorage.setItem("orders", JSON.stringify(allOrders));
+          loadOrders();
+        });
 
-      const order = {
-        orderId,
-        name,
-        mobile,
-        address,
-        mQty,
-        cQty,
-        eQty,
-        total,
-        deliveryDate,
-        orderDate,
-        orderTime,
-        notes,
-        delivered: false
-      };
+        tbody.appendChild(row);
+      });
+    }
 
-      const existing = JSON.parse(localStorage.getItem("orders") || "[]");
-      existing.push(order);
-      localStorage.setItem("orders", JSON.stringify(existing));
+    function exportToExcel() {
+      const allOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+      const filterDate = document.getElementById("filterDate").value;
 
-      alert("✅ Order placed successfully!");
-      this.reset();
-    });
+      const filteredOrders = filterDate
+        ? allOrders.filter(o => o.orderDate === filterDate)
+        : allOrders;
+
+      if (filteredOrders.length === 0) {
+        alert("❌ No orders to export!");
+        return;
+      }
+
+      const uniqueOrders = [];
+      const seen = new Set();
+      for (const order of filteredOrders) {
+        if (!seen.has(order.orderId)) {
+          seen.add(order.orderId);
+          uniqueOrders.push(order);
+        }
+      }
+
+      const worksheet = XLSX.utils.json_to_sheet(
+        uniqueOrders.map(o => ({
+          "Order ID": o.orderId,
+          "Name": o.name,
+          "Mobile": o.mobile,
+          "Mutton (kg)": o.mQty,
+          "Chicken (kg)": o.cQty,
+          "Eggs": o.eQty,
+          "Total (₹)": o.total,
+          "Order Date": o.orderDate,
+          "Order Time": o.orderTime,
+          "Delivery Date": o.deliveryDate,
+          "Address": o.address,
+          "Notes": o.notes || "",
+          "Status": o.delivered ? "Delivered" : "Pending"
+        }))
+      );
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+      const date = new Date().toISOString().split("T")[0];
+      XLSX.writeFile(workbook, `M&M_Orders_${filterDate || date}.xlsx`);
+    }
+
+    // Load orders on page load
+    window.onload = loadOrders;
   </script>
 </body>
 </html>
