@@ -47,7 +47,21 @@
     window.location.href = "login.html";
   }
 </script>
+<button id="logoutBtn" style="background-color:#c62828; color:white; padding:10px 20px; border:none; border-radius:6px; margin-bottom:20px; cursor:pointer;">
+  🔓 Logout
+</button>
+<script>
+  // Block unauthorized access
+  if (localStorage.getItem("isLoggedIn") !== "true") {
+    window.location.href = "login.html";
+  }
 
+  // Logout button handler
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    localStorage.removeItem("isLoggedIn");
+    window.location.href = "login.html";
+  });
+</script>
   <script>
     const orders = JSON.parse(localStorage.getItem("mm_orders") || "[]");
     const exportedIds = JSON.parse(localStorage.getItem("mm_exported") || "[]");
