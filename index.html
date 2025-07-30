@@ -8,6 +8,7 @@
     * {
       box-sizing: border-box;
     }
+
     body {
       margin: 0;
       padding: 20px;
@@ -20,10 +21,21 @@
       position: relative;
     }
 
+    .header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      max-width: 135px;
+      margin-bottom: 15px;
+    }
+
     .top-bar {
-      position: absolute;
-      top: 15px;
-      right: 20px;
+      margin-top: 10px;
     }
 
     .admin-link {
@@ -41,11 +53,6 @@
       background-color: #fdd835;
     }
 
-    .logo {
-      max-width: 135px;
-      margin-bottom: 15px;
-    }
-
     h1 {
       font-size: 1.8rem;
       color: #ffffff;
@@ -54,7 +61,7 @@
 
     .tagline {
       font-size: 0.9rem;
-      color:#ffffff;
+      color: #ffffff;
       margin-bottom: 20px;
     }
 
@@ -67,7 +74,7 @@
     }
 
     .badge {
-      background-color:#FFEB3B;
+      background-color: #FFEB3B;
       border: 1px solid #ccc;
       border-radius: 12px;
       padding: 10px;
@@ -79,7 +86,7 @@
     }
 
     .badge img {
-      background-color:#FBCEB1;
+      background-color: #FBCEB1;
       width: 20px;
       height: 20px;
     }
@@ -103,8 +110,8 @@
     a button {
       padding: 14px 24px;
       font-size: 1rem;
-      background-color:#FBCEB1;
-      color:Black;
+      background-color: #FBCEB1;
+      color: Black;
       border: none;
       border-radius: 8px;
       cursor: pointer;
@@ -119,17 +126,32 @@
     a {
       text-decoration: none;
     }
+
+    @media (max-width: 600px) {
+      .header {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .top-bar {
+        position: static;
+        margin-top: 10px;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <!-- TOP-RIGHT ADMIN LOGIN LINK -->
-  <div class="top-bar">
-    <a href="login.html" class="admin-link">🔒 Admin Login</a>
-  </div>
+  <!-- FLEX CONTAINER FOR LOGO + LOGIN -->
+  <div class="header">
+    <!-- LOGO -->
+    <img src="logo.jpg" alt="M&M Agro Farms Logo" class="logo" />
 
-  <!-- LOGO -->
-  <img src="logo.jpg" alt="M&M Agro Farms Logo" class="logo" />
+    <!-- ADMIN LOGIN LINK -->
+    <div class="top-bar">
+      <a href="login.html" class="admin-link">🔒 Admin Login</a>
+    </div>
+  </div>
 
   <!-- TITLE -->
   <h1>M&M Agro Farms</h1>
