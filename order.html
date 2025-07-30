@@ -48,6 +48,7 @@
       max-width: 600px;
       margin: 0 auto;
       text-align: left;
+      transition: opacity 0.3s ease;
     }
 
     label {
@@ -90,13 +91,33 @@
     button:hover {
       background-color: #2e7d32;
     }
+
+    #closeFormBtn {
+      background-color: #d32f2f;
+      margin-left: 10px;
+    }
+
+    #closeFormBtn:hover {
+      background-color: #b71c1c;
+    }
+
+    #reopenFormBtn {
+      display: none;
+      margin-top: 30px;
+      background-color: #0288d1;
+      color: white;
+    }
+
+    #reopenFormBtn:hover {
+      background-color: #0277bd;
+    }
   </style>
 </head>
 <body>
   <h2>🌿 M&M Agro Farms 🌿</h2>
   <h3 class="blink-sunday">Delivery available only on Sundays. Orders accepted until Saturday 9:00 PM.</h3>
 
-  <div class="order-form">
+  <div class="order-form" id="formContainer">
     <form id="orderForm">
       <label for="name">👤 Name:</label>
       <input type="text" id="name" name="name" required />
@@ -127,8 +148,11 @@
 
       <div id="totalAmount">💰 Total: ₹0.00</div>
       <button type="submit">Submit Order</button>
+      <button type="button" id="closeFormBtn">Close</button>
     </form>
   </div>
+
+  <button id="reopenFormBtn">📝 Reopen Order Form</button>
 
   <script>
     const prices = { mutton: 850, chicken: 550, eggs: 13 };
@@ -136,6 +160,9 @@
     const chickenEl = document.getElementById("chicken");
     const eggsEl = document.getElementById("eggs");
     const totalEl = document.getElementById("totalAmount");
+    const formEl = document.getElementById("orderForm");
+    const formContainer = document.getElementById("formContainer");
+    const reopenFormBtn = document.getElementById("reopenFormBtn");
 
     function calculateTotal() {
       const total =
@@ -179,7 +206,7 @@
       document.getElementById("deliveryDate").value = formatDate(nextSunday);
     };
 
-    document.getElementById("orderForm").addEventListener("submit", function(e) {
+    formEl.addEventListener("submit", function(e) {
       e.preventDefault();
 
       const now = new Date();
@@ -222,7 +249,7 @@
 
       const encoded = encodeURIComponent(message);
 
-      // First send to company
+      // Send to company
       window.open(`https://wa.me/918688014021?text=${encoded}`, '_blank');
 
       // Then send to customer
@@ -231,6 +258,24 @@
       }, 800);
 
       alert("✅ Order submitted! Confirmation message sent via WhatsApp.");
+
+      formEl.reset();
+      calculateTotal();
+    });
+
+    // Close and Reopen logic
+    document.getElementById("closeFormBtn").addEventListener("click", () => {
+      formContainer.style.opacity = "0";
+      setTimeout(() => {
+        formContainer.style.display = "none";
+        reopenFormBtn.style.display = "inline-block";
+      }, 300);
+    });
+
+    reopenFormBtn.addEventListener("click", () => {
+      formContainer.style.display = "block";
+      setTimeout(() => formContainer.style.opacity = "1", 10);
+      reopenFormBtn.style.display = "none";
     });
   </script>
 </body>
