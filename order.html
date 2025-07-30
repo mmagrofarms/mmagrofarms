@@ -182,11 +182,13 @@
     }
 
     window.onload = () => {
-      const nextSunday = getNextSunday();
+      const today = new Date();
       const orderDateInput = document.getElementById("orderDate");
-      orderDateInput.value = formatDate(nextSunday);
-      orderDateInput.min = formatDate(nextSunday);
-      orderDateInput.max = formatDate(nextSunday);
+      orderDateInput.value = formatDate(today);
+      orderDateInput.min = formatDate(today);
+      orderDateInput.max = formatDate(today);
+
+      const nextSunday = getNextSunday();
       document.getElementById("deliveryDate").value = formatDisplay(nextSunday);
       calculateTotal();
     };
