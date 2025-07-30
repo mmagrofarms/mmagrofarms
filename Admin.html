@@ -42,6 +42,11 @@
     </thead>
     <tbody id="ordersBody"></tbody>
   </table>
+<script>
+  if (localStorage.getItem("isLoggedIn") !== "true") {
+    window.location.href = "login.html";
+  }
+</script>
 
   <script>
     const orders = JSON.parse(localStorage.getItem("mm_orders") || "[]");
