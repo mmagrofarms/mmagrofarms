@@ -1,184 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin – M&M Agro Farms</title>
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard – M&M Agro Farms</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
       padding: 20px;
-      background: #f4f4f4;
+      text-align: center;
     }
     h2 {
       color: #2e7d32;
     }
     table {
-      border-collapse: collapse;
       width: 100%;
-      margin-top: 15px;
-      background-color: #fff;
+      border-collapse: collapse;
+      margin-top: 20px;
     }
     th, td {
-      padding: 8px;
       border: 1px solid #ccc;
+      padding: 8px;
       text-align: center;
     }
     th {
-      background-color: #dcedc8;
+      background-color: #e0f2f1;
     }
-    .summary {
-      margin-top: 20px;
-      background: #e8f5e9;
-      padding: 10px;
-      border-radius: 8px;
+    .filter {
+      margin-bottom: 20px;
     }
     button {
-      background-color: #2e7d32;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #388e3c;
       color: white;
       border: none;
-      padding: 10px 20px;
-      margin: 10px 10px 10px 0;
       border-radius: 6px;
       cursor: pointer;
     }
     button:hover {
-      background-color: #1b5e20;
+      background-color: #2e7d32;
     }
-    #filterDate {
-      padding: 5px;
-      margin: 10px 0;
+    input[type="date"] {
+      padding: 8px;
     }
   </style>
 </head>
 <body>
-  <h2>Admin Dashboard – M&M Agro Farms</h2>
-  <input type="date" id="filterDate" onchange="renderOrders()" />
-  <button onclick="exportToExcel()">📁 Export Orders to Excel</button>
-  <div class="summary" id="summary"></div>
+  <h2>📊 Admin Dashboard – M&M Agro Farms</h2>
+  <div class="filter">
+    <label for="filterDate">📅 Filter by Order Date:</label>
+    <input type="date" id="filterDate" />
+    <button onclick="loadOrders()">🔄 Refresh</button>
+  </div>
   <table id="ordersTable">
     <thead>
       <tr>
-        <th>Date</th>
         <th>Order ID</th>
         <th>Name</th>
-        <th>Phone</th>
-        <th>Address</th>
-        <th>Mutton (Kg)</th>
-        <th>Chicken (Kg)</th>
+        <th>Mobile</th>
+        <th>Mutton</th>
+        <th>Chicken</th>
         <th>Eggs</th>
-        <th>Total ₹</th>
-        <th>Status</th>
+        <th>Total</th>
+        <th>Order Date</th>
+        <th>Delivery Date</th>
+        <th>Address</th>
+        <th>Delivered</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
+  <button onclick="exportToExcel()">📤 Export to Excel</button>
 
   <script>
-    // Password protection
-    const ADMIN_PASSWORD = "mmadmin123"; // change as needed
-    if (sessionStorage.getItem("mm_admin_auth") !== "true") {
-      const password = prompt("Enter Admin Password:");
-      if (password !== ADMIN_PASSWORD) {
-        alert("❌ Incorrect password. Access denied.");
-        document.body.innerHTML = "<h2 style='color:red;'>Access Denied</h2>";
-        throw new Error("Unauthorized");
-      } else {
-        sessionStorage.setItem("mm_admin_auth", "true");
-      }
+    // Sample orders from localStorage
+    function getOrders() {
+      return JSON.parse(localStorage.getItem("mm_orders") || "[]");
     }
 
-    const orders = JSON.parse(localStorage.getItem("orders")) || [];
-
-    function updateStatus(orderId, newStatus) {
-      let updated = false;
-      for (let o of orders) {
-        if (o.orderId === orderId) {
-          o.status = newStatus;
-          updated = true;
-          break;
-        }
-      }
-      if (updated) {
-        localStorage.setItem("orders", JSON.stringify(orders));
-        renderOrders();
-      }
-    }
-
-    function renderOrders() {
+    function loadOrders() {
       const tbody = document.querySelector("#ordersTable tbody");
       tbody.innerHTML = "";
 
-      const today = new Date().toISOString().split('T')[0];
-      const selectedDate = document.getElementById("filterDate").value || today;
+      const filterDate = document.getElementById("filterDate").value;
+      const orders = getOrders();
+      orders.forEach((order, i) => {
+        if (filterDate && order.orderDate !== filterDate) return;
 
-      let totalMutton = 0, totalChicken = 0, totalEggs = 0, pendingCount = 0, deliveredCount = 0;
-
-      const filtered = orders.filter(o => o.date === selectedDate);
-
-      filtered.forEach(order => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${order.date}</td>
           <td>${order.orderId}</td>
           <td>${order.name}</td>
-          <td>${order.phone}</td>
-          <td>${order.address}</td>
+          <td>${order.mobile}</td>
           <td>${order.mutton}</td>
           <td>${order.chicken}</td>
           <td>${order.eggs}</td>
-          <td>${order.total}</td>
-          <td>
-            <select onchange="updateStatus('${order.orderId}', this.value)">
-              <option value="Pending" ${order.status === "Pending" ? "selected" : ""}>Pending</option>
-              <option value="Delivered" ${order.status === "Delivered" ? "selected" : ""}>Delivered</option>
-            </select>
-          </td>
+          <td>₹${order.total}</td>
+          <td>${order.orderDate}</td>
+          <td>${order.deliveryDate}</td>
+          <td>${order.address}</td>
+          <td><input type="checkbox" ${order.delivered ? "checked" : ""} onchange="toggleDelivery(${i})" /></td>
         `;
         tbody.appendChild(tr);
-
-        totalMutton += order.mutton;
-        totalChicken += order.chicken;
-        totalEggs += order.eggs;
-        if (order.status === "Pending") pendingCount++;
-        if (order.status === "Delivered") deliveredCount++;
       });
+    }
 
-      document.getElementById("summary").innerHTML = `
-        <strong>Summary for ${selectedDate}:</strong><br>
-        🐐 Mutton: ${totalMutton} Kg<br>
-        🐓 Chicken: ${totalChicken} Kg<br>
-        🥚 Eggs: ${totalEggs} pcs<br>
-        📦 Delivered: ${deliveredCount} | ⏳ Pending: ${pendingCount}
-      `;
+    function toggleDelivery(index) {
+      const orders = getOrders();
+      orders[index].delivered = !orders[index].delivered;
+      localStorage.setItem("mm_orders", JSON.stringify(orders));
+      loadOrders();
     }
 
     function exportToExcel() {
-      const ws_data = [
-        ["Date", "Order ID", "Name", "Phone", "Address", "Mutton (Kg)", "Chicken (Kg)", "Eggs", "Total ₹", "Status"]
+      const orders = getOrders();
+      const filtered = document.getElementById("filterDate").value;
+      const data = [
+        ["Order ID", "Name", "Mobile", "Mutton", "Chicken", "Eggs", "Total", "Order Date", "Delivery Date", "Address", "Delivered"]
       ];
       orders.forEach(order => {
-        ws_data.push([
-          order.date,
+        if (filtered && order.orderDate !== filtered) return;
+        data.push([
           order.orderId,
           order.name,
-          order.phone,
-          order.address,
+          order.mobile,
           order.mutton,
           order.chicken,
           order.eggs,
           order.total,
-          order.status
+          order.orderDate,
+          order.deliveryDate,
+          order.address,
+          order.delivered ? "Yes" : "No"
         ]);
       });
+      const ws = XLSX.utils.aoa_to_sheet(data);
       const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.aoa_to_sheet(ws_data);
       XLSX.utils.book_append_sheet(wb, ws, "Orders");
-      const today = new Date().toISOString().split('T')[0];
-      XLSX.writeFile(wb, `MM-Orders-${today}.xlsx`);
+      XLSX.writeFile(wb, `MM-Orders-${filtered || "All"}.xlsx`);
     }
 
-    renderOrders();
+    // Load on page
+    loadOrders();
   </script>
 </body>
 </html>
