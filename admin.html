@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard – M&M Agro Farms</title>
+<script>
+  // Block unauthorized access
+  if (localStorage.getItem("isLoggedIn") !== "true") {
+    window.location.href = "login.html";
+  }
+  // The rest of your admin script goes here...
+</script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
@@ -16,14 +23,15 @@
       color: #2e7d32;
       margin-bottom: 10px;
     }
-    .filters {
+    .filters, .super-log-controls {
       text-align: center;
       margin-bottom: 20px;
     }
-    input[type="date"] {
+    input[type="date"], input[type="text"] {
       padding: 6px;
       border-radius: 4px;
       border: 1px solid #ccc;
+      margin: 5px;
     }
     button {
       margin: 5px;
@@ -54,6 +62,10 @@
     td.toggle {
       text-align: center;
     }
+    #superLogPanel {
+      display: none;
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
@@ -73,13 +85,13 @@
         <th>Order ID</th>
         <th>Name</th>
         <th>Mobile</th>
-        <th>Mutton</th>
-        <th>Chicken</th>
+        <th>Mutton (kg)</th>
+        <th>Chicken (kg)</th>
         <th>Eggs</th>
         <th>Total (₹)</th>
         <th>Order Date</th>
         <th>Order Time</th>
-        <th>Delivery</th>
+        <th>Delivery Date</th>
         <th>Address</th>
         <th>Notes</th>
         <th>Delivered</th>
@@ -88,21 +100,44 @@
     <tbody></tbody>
   </table>
 
+  <div id="superLogPanel">
+    <h2>🕵️ Admin Access Logs</h2>
+    <div class="super-log-controls">
+      <button onclick="exportLogsToExcel()">Export Logs</button>
+    </div>
+    <table id="logTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Mobile</th>
+          <th>Action</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
   <script>
     const ordersKey = "orders";
+    const logsKey = "accessLogs";
+    const prices = { mutton: 850, chicken: 550, egg: 13 };
     let allOrders = [];
 
     function loadOrders(filteredDate = null) {
       const tableBody = document.querySelector("#ordersTable tbody");
       tableBody.innerHTML = "";
       allOrders = JSON.parse(localStorage.getItem(ordersKey) || "[]");
+      const usedIds = new Set();
 
-      const usedIds = new Set(); // Prevent duplicates
       allOrders.forEach(order => {
         if (usedIds.has(order.orderId)) return;
         usedIds.add(order.orderId);
 
         if (filteredDate && order.orderDate !== filteredDate) return;
+
+        const total = (order.mQty * prices.mutton) + (order.cQty * prices.chicken) + (order.eQty * prices.egg);
 
         const row = tableBody.insertRow();
         row.innerHTML = `
@@ -112,15 +147,14 @@
           <td>${order.mQty}</td>
           <td>${order.cQty}</td>
           <td>${order.eQty}</td>
-          <td>${order.total}</td>
+          <td>${total}</td>
           <td>${order.orderDate}</td>
           <td>${order.orderTime}</td>
           <td>${order.deliveryDate}</td>
           <td>${order.address}</td>
           <td>${order.notes || "-"}</td>
           <td class="toggle">
-            <input type="checkbox" ${order.delivered ? "checked" : ""} 
-              onchange="toggleDelivery('${order.orderId}', this.checked)" />
+            <input type="checkbox" ${order.delivered ? "checked" : ""} onchange="toggleDelivery('${order.orderId}', this.checked)" />
           </td>
         `;
       });
@@ -160,11 +194,61 @@
       XLSX.writeFile(wb, `M&M_Orders_${new Date().toISOString().split("T")[0]}.xlsx`);
     }
 
-    // Load all on page load
+    function logAccess(action = "Viewed") {
+      const mobile = localStorage.getItem("adminMobile") || "Unknown";
+      const now = new Date();
+      const entry = {
+        date: now.toISOString().split("T")[0],
+        time: now.toTimeString().split(" ")[0],
+        mobile: mobile,
+        action: action,
+        location: localStorage.getItem("userLocation") || "N/A"
+      };
+      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
+      logs.push(entry);
+      localStorage.setItem(logsKey, JSON.stringify(logs));
+    }
+
+    function loadLogs() {
+      const logBody = document.querySelector("#logTable tbody");
+      logBody.innerHTML = "";
+      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
+      logs.forEach(log => {
+        const row = logBody.insertRow();
+        row.innerHTML = `
+          <td>${log.date}</td>
+          <td>${log.time}</td>
+          <td>${log.mobile}</td>
+          <td>${log.action}</td>
+          <td>${log.location}</td>
+        `;
+      });
+    }
+
+    function exportLogsToExcel() {
+      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
+      const rows = [["Date", "Time", "Mobile", "Action", "Location"]];
+      logs.forEach(log => rows.push([log.date, log.time, log.mobile, log.action, log.location]));
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Logs");
+      XLSX.writeFile(wb, `Admin_Access_Logs_${new Date().toISOString().split("T")[0]}.xlsx`);
+    }
+
+    // Secret trigger
+    document.addEventListener("keydown", function (e) {
+      if (e.ctrlKey && e.shiftKey && e.key === "##") {
+        const panel = document.getElementById("superLogPanel");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+        loadLogs();
+      }
+    });
+
     window.onload = () => {
       const today = new Date().toISOString().split("T")[0];
       document.getElementById("dateFilter").value = today;
       loadOrders();
+      logAccess("Visited Admin Page");
     };
   </script>
 </body>
