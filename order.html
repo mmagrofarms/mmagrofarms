@@ -95,7 +95,7 @@
 </head>
 <body>
   <h2>🌿 M&M Agro Farms 🌿</h2>
-  <h3 class="blink-sunday">Delivery is available only on the upcoming Sunday. Orders for other days are not accepted.</h3>
+  <h3 class="blink-sunday">Delivery available only on Sundays. Orders accepted until Saturday 9:00 PM.</h3>
 
   <div class="order-form">
     <form id="orderForm">
@@ -117,7 +117,7 @@
       <label for="orderDate">📅 Order Date:</label>
       <input type="date" id="orderDate" name="orderDate" required />
 
-      <label for="deliveryDate">🗓️ Delivery Date (Next Sunday Only):</label>
+      <label for="deliveryDate">🗓️ Delivery Date (Auto-set to Next Sunday):</label>
       <input type="text" id="deliveryDate" readonly />
 
       <label for="address">📍 Address:</label>
@@ -167,6 +167,16 @@
       });
     }
 
+    function formatDateTime(date) {
+      return date.toLocaleString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
     window.onload = () => {
       const nextSunday = getNextSunday();
       document.getElementById("deliveryDate").value = formatDate(nextSunday);
@@ -175,12 +185,23 @@
     document.getElementById("orderForm").addEventListener("submit", function(e) {
       e.preventDefault();
 
+      const now = new Date();
+      const orderCutoff = new Date();
+      orderCutoff.setDate(orderCutoff.getDate() + ((6 - orderCutoff.getDay() + 7) % 7)); // Saturday
+      orderCutoff.setHours(21, 0, 0, 0); // 9 PM
+
+      if (now > orderCutoff) {
+        alert("🚫 Orders after Saturday 9:00 PM are not accepted for Sunday delivery.");
+        return;
+      }
+
       const name = document.getElementById("name").value;
       const mobile = document.getElementById("mobile").value;
       const mQty = parseFloat(muttonEl.value || 0);
       const cQty = parseFloat(chickenEl.value || 0);
       const eQty = parseFloat(eggsEl.value || 0);
       const orderDate = document.getElementById("orderDate").value;
+      const orderTime = formatDateTime(now);
       const deliveryDate = document.getElementById("deliveryDate").value;
       const address = document.getElementById("address").value;
       const notes = document.getElementById("notes").value;
@@ -197,7 +218,8 @@
         `💰 Total: ₹${total.toFixed(2)}\n` +
         `📍 Address: ${address}\n` +
         `📅 Order Date: ${orderDate}\n` +
-        `🗓️ Delivery Date: ${deliveryDate}\n` +
+        `⏰ Order Time: ${orderTime}\n` +
+        `🚚 Delivery Date: ${deliveryDate}\n` +
         `📝 Notes: ${notes || "-"}\n` +
         `✅ Thank you for choosing M&M Agro Farms!`;
 
