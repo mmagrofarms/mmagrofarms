@@ -6,6 +6,52 @@
   <title>Admin Dashboard – M&M Agro Farms</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
+<script>
+  function logout() {
+    const mobile = localStorage.getItem("adminMobile") || "unknown";
+    const logs = JSON.parse(localStorage.getItem("accessLogs") || "[]");
+
+    const now = new Date();
+    const logEntry = {
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString(),
+      mobile: mobile,
+      action: "Logout",
+      location: "Fetching..."
+    };
+
+    // Attempt to get GPS/IP location (fallback message if denied)
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords = pos.coords;
+          logEntry.location = `Lat: ${coords.latitude.toFixed(4)}, Long: ${coords.longitude.toFixed(4)}`;
+          logs.push(logEntry);
+          localStorage.setItem("accessLogs", JSON.stringify(logs));
+          finishLogout();
+        },
+        () => {
+          logEntry.location = "Location denied";
+          logs.push(logEntry);
+          localStorage.setItem("accessLogs", JSON.stringify(logs));
+          finishLogout();
+        }
+      );
+    } else {
+      logEntry.location = "Location not supported";
+      logs.push(logEntry);
+      localStorage.setItem("accessLogs", JSON.stringify(logs));
+      finishLogout();
+    }
+  }
+
+  function finishLogout() {
+    localStorage.removeItem("isLoggedIn");
+    window.location.href = "login.html"; // or use "index.html" if preferred
+  }
+</script>
+
+
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
