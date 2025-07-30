@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>M&M Agro Farms – Order</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -31,13 +32,12 @@
 
     h2 {
       color: #2e7d32;
-     font-size: 36px;
+      font-size: 36px;
       margin-bottom: 10px;
     }
 
-    h4 {
+    h5 {
       color: #FFB6C1;
-      
       margin-bottom: 20px;
     }
 
@@ -205,6 +205,7 @@
     window.onload = () => {
       const nextSunday = getNextSunday();
       document.getElementById("deliveryDate").value = formatDate(nextSunday);
+      calculateTotal();
     };
 
     formEl.addEventListener("submit", function(e) {
@@ -213,7 +214,7 @@
       const now = new Date();
       const orderCutoff = new Date();
       orderCutoff.setDate(orderCutoff.getDate() + ((6 - orderCutoff.getDay() + 7) % 7));
-      orderCutoff.setHours(21, 0, 0, 0); // Saturday 9 PM
+      orderCutoff.setHours(21, 0, 0, 0);
 
       if (now > orderCutoff) {
         alert("🚫 Orders after Saturday 9:00 PM are not accepted for Sunday delivery.");
@@ -234,8 +235,7 @@
       const orderId = `MM${Math.floor(100000 + Math.random() * 900000)}`;
 
       const message =
-        "🌿 M&M Agro Farms 🌿\n" +
-        "Your Order Details:\n" +
+        `🌿 M&M Agro Farms 🌿\n` +
         `🆔 Order ID: ${orderId}\n` +
         `👤 Name: ${name}\n` +
         `📞 Mobile: ${mobile}\n` +
@@ -249,14 +249,20 @@
         `✅ Thank you for choosing M&M Agro Farms!`;
 
       const encoded = encodeURIComponent(message);
-
-      // Send to company
       window.open(`https://wa.me/918688014021?text=${encoded}`, '_blank');
-
-      // Then send to customer
       setTimeout(() => {
         window.open(`https://wa.me/91${mobile}?text=${encoded}`, '_blank');
       }, 800);
+
+      const orderData = [
+        ["Order ID", "Name", "Mobile", "Mutton (kg)", "Chicken (kg)", "Eggs", "Total", "Order Date", "Order Time", "Delivery Date", "Address", "Notes"],
+        [orderId, name, mobile, mQty, cQty, eQty, total.toFixed(2), orderDate, orderTime, deliveryDate, address, notes]
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(orderData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Orders");
+      XLSX.writeFile(wb, `MM-Order-${orderId}.xlsx`);
 
       alert("✅ Order submitted! Confirmation message sent via WhatsApp.");
 
@@ -264,26 +270,17 @@
       calculateTotal();
     });
 
-   <!-- Close Button -->
-<button id="closeFormBtn">❌ Close</button>
-
-<script>
-  document.getElementById("closeFormBtn").addEventListener("click", () => {
-    // Confirm with the user before exiting
-    if (confirm("Are you sure you want to exit the order form?")) {
-      // Try to close the tab (works only if the tab was opened by JS)
-      window.open('', '_self');
-      window.close();
-
-      // Fallback: Show exit message
-      document.body.innerHTML = `
-        <h2 style="text-align:center; color:gray; margin-top: 50px;">
-          ✅ You have exited the order form.<br>Thank you!
-        </h2>
-      `;
-    }
-  });
-</script>
+    document.getElementById("closeFormBtn").addEventListener("click", () => {
+      if (confirm("Are you sure you want to exit the order form?")) {
+        window.open('', '_self');
+        window.close();
+        document.body.innerHTML = `
+          <h2 style="text-align:center; color:gray; margin-top: 50px;">
+            ✅ You have exited the order form.<br>Thank you!
+          </h2>
+        `;
+      }
+    });
   </script>
 </body>
 </html>
