@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>M&M Agro Farms - Order</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>M&M Agro Farms – Order</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -14,76 +14,64 @@
     h2 {
       color: #2e7d32;
       font-size: 36px;
+      margin-bottom: 10px;
+    }
+    h3 {
+      color: #FFB6C1; /* light pink tagline */
       margin-bottom: 20px;
     }
     .order-form {
-      background-color: #ffffff;
+      background-color: #e0f2f1;
       padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
       max-width: 600px;
       margin: 0 auto;
       text-align: left;
     }
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, textarea {
+      width: 100%; padding: 10px; margin-top: 8px;
+      border: 1px solid #ccc; border-radius: 6px;
     }
     #totalAmount {
-      font-size: 20px;
-      margin-top: 20px;
-      color: #d32f2f;
-      font-weight: bold;
+      font-size: 20px; margin-top: 20px;
+      color: #d32f2f; font-weight: bold;
     }
     button {
-      margin-top: 25px;
-      background-color: #388e3c;
-      color: #fff;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 18px;
+      margin-top: 25px; background-color: #388e3c;
+      color: #000; padding: 12px; border: none;
+      border-radius: 8px; cursor: pointer; font-size: 18px;
     }
-    button:hover {
-      background-color: #2e7d32;
-    }
+    button:hover { background-color: #2e7d32; }
   </style>
 </head>
 <body>
-
   <h2>🌿 M&M Agro Farms 🌿</h2>
-<h3>Pottel Mutton Order, Desi Chicken Order</h3>
+  <h3>Delivery Available Only on Sundays</h3>
+
   <div class="order-form">
     <form id="orderForm">
       <label for="name">👤 Name:</label>
-      <input type="text" id="name" name="name" required>
+      <input type="text" id="name" name="name" required />
 
       <label for="mobile">📞 Mobile:</label>
-      <input type="tel" id="mobile" name="mobile" required>
+      <input type="tel" id="mobile" name="mobile" required />
 
-      <label for="mutton">Mutton (₹850/kg):</label>
-      <input type="number" id="mutton" name="mutton" min="0" value="0" step="0.1">
+      <label for="mutton">📦 Mutton (₹850/kg):</label>
+      <input type="number" id="mutton" name="mutton" min="0" value="0" step="0.001" />
 
-      <label for="chicken">Desi Chicken (₹550/kg):</label>
-      <input type="number" id="chicken" name="chicken" min="0" value="0" step="0.1">
+      <label for="chicken">📦 Desi Chicken (₹550/kg):</label>
+      <input type="number" id="chicken" name="chicken" min="0" value="0" step="0.001" />
 
-      <label for="eggs">Desi Eggs (₹13 each):</label>
-      <input type="number" id="eggs" name="eggs" min="0" value="0" step="1">
+      <label for="eggs">🥚 Desi Eggs (₹13 each):</label>
+      <input type="number" id="eggs" name="eggs" min="0" value="0" step="1" />
 
       <label for="address">📍 Address:</label>
       <textarea id="address" name="address" required></textarea>
 
-      <label for="delivery">🕓 Delivery Date & Time:</label>
-      <input type="datetime-local" id="delivery" name="delivery" required>
+      <label for="delivery">🗓️ Delivery Date &amp; Time (must be Sunday):</label>
+      <input type="datetime-local" id="delivery" name="delivery" required />
 
       <label for="notes">📝 Notes (Optional):</label>
       <textarea id="notes" name="notes"></textarea>
@@ -94,72 +82,73 @@
   </div>
 
   <script>
-    const prices = {
-      mutton: 850,
-      chicken: 550,
-      eggs: 13
-    };
-
-    const mutton = document.getElementById("mutton");
-    const chicken = document.getElementById("chicken");
-    const eggs = document.getElementById("eggs");
-    const totalAmount = document.getElementById("totalAmount");
+    const prices = { mutton: 850, chicken: 550, eggs: 13 };
+    const muttonEl = document.getElementById("mutton");
+    const chickenEl = document.getElementById("chicken");
+    const eggsEl = document.getElementById("eggs");
+    const totalEl = document.getElementById("totalAmount");
 
     function calculateTotal() {
       const total =
-        (parseFloat(mutton.value || 0) * prices.mutton) +
-        (parseFloat(chicken.value || 0) * prices.chicken) +
-        (parseFloat(eggs.value || 0) * prices.eggs);
-      totalAmount.innerText = `💰 Total: ₹${total.toFixed(2)}`;
+        (parseFloat(muttonEl.value || 0) * prices.mutton) +
+        (parseFloat(chickenEl.value || 0) * prices.chicken) +
+        (parseFloat(eggsEl.value || 0) * prices.eggs);
+      totalEl.innerText = `💰 Total: ₹${total.toFixed(2)}`;
       return total;
     }
 
-    mutton.addEventListener("input", calculateTotal);
-    chicken.addEventListener("input", calculateTotal);
-    eggs.addEventListener("input", calculateTotal);
+    [muttonEl, chickenEl, eggsEl].forEach(i => i.addEventListener("input", calculateTotal));
+
+    function getNextSunday() {
+      const today = new Date();
+      const diff = (7 - today.getDay()) % 7 || 7;
+      const next = new Date(today.getFullYear(), today.getMonth(), today.getDate() + diff);
+      next.setHours(0,0,0,0);
+      return next;
+    }
 
     document.getElementById("orderForm").addEventListener("submit", function(e) {
       e.preventDefault();
+      const deliveryInput = document.getElementById("delivery").value;
+      const deliveryDate = deliveryInput ? new Date(deliveryInput) : null;
+      const nextSunday = getNextSunday();
+
+      if (!deliveryDate || deliveryDate.getDay() !== 0 ||
+          deliveryDate.toDateString() !== nextSunday.toDateString()) {
+        alert(`🚫 Sorry, delivery is available only on the upcoming Sunday (${ nextSunday.toDateString() }).`);
+        return;
+      }
 
       const name = document.getElementById("name").value;
       const mobile = document.getElementById("mobile").value;
-      const muttonQty = parseFloat(mutton.value || 0);
-      const chickenQty = parseFloat(chicken.value || 0);
-      const eggsQty = parseFloat(eggs.value || 0);
+      const mQty = parseFloat(muttonEl.value || 0);
+      const cQty = parseFloat(chickenEl.value || 0);
+      const eQty = parseFloat(eggsEl.value || 0);
       const address = document.getElementById("address").value;
-      const delivery = document.getElementById("delivery").value;
       const notes = document.getElementById("notes").value;
       const total = calculateTotal();
       const orderId = `MM${Math.floor(100000 + Math.random() * 900000)}`;
 
-      const message = `🌿 M&M Agro Farms 🌿` +
-        const Message =' Your Order Details..\n'+
+      const message =
+        "🌿 M&M Agro Farms 🌿\n" +
+        "Your Order Details:\n" +
         `🆔 Order ID: ${orderId}\n` +
         `👤 Name: ${name}\n` +
         `📞 Mobile: ${mobile}\n` +
-        `📦 Quantity: ${muttonQty}kg Mutton, ${chickenQty}kg Chicken, ${eggsQty} Eggs\n` +
+        `📦 Qty: ${mQty} kg Mutton, ${cQty} kg Chicken, ${eQty} Eggs\n` +
         `💰 Total: ₹${total.toFixed(2)}\n` +
         `📍 Address: ${address}\n` +
-        `🕓 Delivery: ${delivery}\n` +
+        `🗓️ Delivery: ${deliveryDate}\n` +
         `📝 Notes: ${notes || "-"}\n` +
         `✅ Thank you for choosing M&M Agro Farms!`;
 
-      const encodedMessage = encodeURIComponent(message);
-
-      // Open WhatsApp for the customer (in a new tab)
-      window.open(`https://wa.me/91${mobile}?text=${encodedMessage}`, '_blank');
-
-      // Send a copy to the admin without asking the user for confirmation (in a new tab)
-      setTimeout(function() {
-        window.open(`https://wa.me/918688014021?text=${encodedMessage}`, '_blank');
-      }, 500);
-
-      // Success message and reset form
-      alert("Order submitted successfully! You will now be redirected to WhatsApp.");
-      document.getElementById("orderForm").reset();
+      const encoded = encodeURIComponent(message);
+      window.open(`https://wa.me/91${mobile}?text=${encoded}`, '_blank');
+      setTimeout(() => window.open(`https://wa.me/918688014021?text=${encoded}`, '_blank'), 500);
+      alert("✅ Order submitted! Redirecting to WhatsApp.");
+      this.reset();
       calculateTotal();
     });
   </script>
-
 </body>
 </html>
