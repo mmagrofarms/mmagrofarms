@@ -172,9 +172,7 @@
     }
 
     function formatDate(date) {
-      return date.toLocaleDateString("en-IN", {
-        year: "numeric", month: "2-digit", day: "2-digit"
-      }).split("/").reverse().join("-");
+      return date.toISOString().split("T")[0];
     }
 
     function formatDisplay(date) {
@@ -184,15 +182,11 @@
     }
 
     window.onload = () => {
-      const today = new Date();
       const nextSunday = getNextSunday();
-
-      // Show only this coming Sunday
       const orderDateInput = document.getElementById("orderDate");
       orderDateInput.value = formatDate(nextSunday);
       orderDateInput.min = formatDate(nextSunday);
       orderDateInput.max = formatDate(nextSunday);
-
       document.getElementById("deliveryDate").value = formatDisplay(nextSunday);
       calculateTotal();
     };
@@ -202,7 +196,6 @@
 
       const now = new Date();
       const nextSunday = getNextSunday();
-
       const cutoff = new Date(nextSunday);
       cutoff.setDate(cutoff.getDate() - 1); // Saturday
       cutoff.setHours(21, 0, 0, 0); // 9:00 PM
@@ -223,15 +216,15 @@
       const total = calculateTotal();
       const orderId = `MM${Math.floor(100000 + Math.random() * 900000)}`;
       const deliveryDate = document.getElementById("deliveryDate").value;
-
       const orderTime = new Date().toLocaleString("en-IN");
 
       const order = {
-        orderId, name, mobile, mQty, cQty, eQty, total, orderDate, orderTime,
-        deliveryDate, address, notes, delivered: false
+        orderId, name, mobile, mQty, cQty, eQty, total: total.toFixed(2),
+        orderDate, orderTime, deliveryDate, address, notes,
+        delivered: false
       };
 
-      const message = 
+      const message =
         `🌿 M&M Agro Farms 🌿\n🆔 ${orderId}\n👤 ${name}\n📞 ${mobile}\n` +
         `📦 ${mQty}kg Mutton, ${cQty}kg Chicken, ${eQty} Eggs\n💰 ₹${total.toFixed(2)}\n` +
         `📍 ${address}\n📅 ${orderDate}\n⏰ ${orderTime}\n🚚 ${deliveryDate}\n` +
@@ -243,13 +236,12 @@
         window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`, "_blank");
       }, 800);
 
-      // Store in localStorage
-      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
-      orders.push(order);
-      localStorage.setItem("orders", JSON.stringify(orders));
+      // Store order in localStorage
+      const storedOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+      storedOrders.push(order);
+      localStorage.setItem("orders", JSON.stringify(storedOrders));
 
       alert("✅ Order submitted and stored!");
-
       this.reset();
       calculateTotal();
     });
