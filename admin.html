@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - M&M Agro Farms</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f0f8f5; }
+    h1 { color: #2e7d32; }
+    .summary { margin: 20px 0; padding: 10px; background: #e0f2f1; border-radius: 10px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    table, th, td { border: 1px solid #ccc; }
+    th, td { padding: 8px; text-align: left; }
+    button { margin: 10px 5px; padding: 10px 15px; background: #388e3c; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #2e7d32; }
+  </style>
+</head>
+<body>
+  <h1>📊 M&M Agro Admin Dashboard</h1>
+
+  <div class="summary" id="summary"></div>
+
+  <button onclick="exportOrders()">⬇️ Export to Excel</button>
+  <button onclick="resetExported()">♻️ Reset Exported</button>
+
+  <table id="ordersTable">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Mutton (kg)</th>
+        <th>Chicken (kg)</th>
+        <th>Eggs</th>
+        <th>Total ₹</th>
+        <th>Order Date</th>
+        <th>Delivery</th>
+        <th>Status</th>
+        <th>Address</th>
+      </tr>
+    </thead>
+    <tbody id="ordersBody"></tbody>
+  </table>
+<script>
+  if (localStorage.getItem("isLoggedIn") !== "true") {
+    window.location.href = "login.html";
+  }
+</script>
+<button id="logoutBtn" style="background-color:#c62828; color:white; padding:10px 20px; border:none; border-radius:6px; margin-bottom:20px; cursor:pointer;">
+  🔓 Logout
+</button>
+<script>
+  // Block unauthorized access
+  if (localStorage.getItem("isLoggedIn") !== "true") {
+    window.location.href = "login.html";
+  }
+
+  // Logout button handler
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    localStorage.removeItem("isLoggedIn");
+    window.location.href = "login.html";
+  });
+</script>
+  <script>
+    const orders = JSON.parse(localStorage.getItem("mm_orders") || "[]");
+    const exportedIds = JSON.parse(localStorage.getItem("mm_exported") || "[]");
+    const ordersBody = document.getElementById("ordersBody");
+
+    let totalMutton = 0, totalChicken = 0, totalEggs = 0, delivered = 0, pending = 0;
+
+    function renderTable() {
+      ordersBody.innerHTML = "";
+      orders.forEach(order => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${order.id}</td>
+          <td>${order.name}</td>
+          <td>${order.mobile}</td>
+          <td>${order.mutton}</td>
+          <td>${order.chicken}</td>
+          <td>${order.eggs}</td>
+          <td>${order.total.toFixed(2)}</td>
+          <td>${order.orderDate}</td>
+          <td>${order.deliveryDate}</td>
+          <td>${order.status}</td>
+          <td>${order.address}</td>
+        `;
+        ordersBody.appendChild(tr);
+
+        if (order.status === "Delivered") delivered++;
+        else pending++;
+
+        totalMutton += parseFloat(order.mutton || 0);
+        totalChicken += parseFloat(order.chicken || 0);
+        totalEggs += parseInt(order.eggs || 0);
+      });
+      document.getElementById("summary").innerHTML = `
+        <strong>Today:</strong><br>
+        🐐 Mutton: ${totalMutton.toFixed(2)} kg<br>
+        🐓 Chicken: ${totalChicken.toFixed(2)} kg<br>
+        🥚 Eggs: ${totalEggs} pcs<br>
+        📦 Orders: ${orders.length}<br>
+        ✅ Delivered: ${delivered} | ⏳ Pending: ${pending}
+      `;
+    }
+
+    function exportOrders() {
+      const newOrders = orders.filter(o => !exportedIds.includes(o.id));
+      if (!newOrders.length) return alert("✅ No new orders to export.");
+
+      const wsData = [
+        ["Order ID", "Name", "Mobile", "Mutton (kg)", "Chicken (kg)", "Eggs", "Total ₹", "Order Date", "Delivery Date", "Status", "Address"]
+      ];
+      newOrders.forEach(o => {
+        wsData.push([o.id, o.name, o.mobile, o.mutton, o.chicken, o.eggs, o.total.toFixed(2), o.orderDate, o.deliveryDate, o.status, o.address]);
+        exportedIds.push(o.id);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Orders");
+      XLSX.writeFile(wb, `MM_Orders_${new Date().toISOString().split("T")[0]}.xlsx`);
+
+      localStorage.setItem("mm_exported", JSON.stringify(exportedIds));
+      alert("📁 Exported new orders to Excel.");
+    }
+
+    function resetExported() {
+      if (confirm("Are you sure you want to reset exported order history?")) {
+        localStorage.removeItem("mm_exported");
+        location.reload();
+      }
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
