@@ -1,385 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard – M&M Agro Farms</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin – M&M Agro Farms Orders</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #1b5e20;
-      color: white;
-      padding: 0;
-    }
-
-    .landing {
-      text-align: center;
-      padding: 20px;
-    }
-
-    .logo-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .logo-container img {
-      width: 120px;
-      height: auto;
-    }
-
-    .logo-container h1 {
-      margin: 10px 0 5px;
-      font-size: 28px;
-    }
-
-    .subtitle {
-      font-size: 12px;
-      color: #ddd;
-      margin-bottom: 20px;
-    }
-
-    .offer-banner {
-      background-color: #f4c2c2;
-      color: black;
-      padding: 12px 20px;
-      border-radius: 20px;
-      margin: 10px auto;
-      max-width: 90%;
-      animation: blink 1s step-start infinite;
-      font-weight: bold;
-    }
-
-    .delivery-info {
-      background-color: #ffeb3b;
-      color: black;
-      padding: 10px 18px;
-      border-radius: 10px;
-      margin: 10px auto;
-      max-width: 90%;
-    }
-
-    .order-button {
-      background-color: #f4c2c2;
-      color: black;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 10px;
-      margin-top: 20px;
-      font-size: 18px;
-      cursor: pointer;
-      animation: blink 1s step-start infinite;
-    }
-
-    @keyframes blink {
-      50% { opacity: 0.3; }
-    }
-
-    .admin-section {
-      background-color: #f4f7f8;
-      color: #000;
-      padding: 20px;
-    }
-
-    h2 {
-      text-align: center;
-      color: #2e7d32;
-      margin-bottom: 10px;
-    }
-
-    .filters, .super-log-controls {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    input[type="date"], input[type="text"], input[type="number"] {
-      padding: 6px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      margin: 5px;
-    }
-
-    button {
-      margin: 5px;
-      padding: 10px 16px;
-      background-color: #2e7d32;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #1b5e20;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    th {
-      background-color: #a5d6a7;
-    }
-
-    #superLogPanel, #rateCardSection {
-      display: none;
-      margin-top: 40px;
-    }
-
-    /* HIDE chicken & egg related inputs/columns */
-    .hide-service {
-      display: none;
-    }
-
-    @media screen and (max-width: 600px) {
-      .logo-container h1 { font-size: 24px; }
-      .offer-banner, .delivery-info { font-size: 14px; }
-      .order-button { font-size: 16px; width: 90%; }
-      table { font-size: 12px; }
-    }
+    body { font-family: Arial, sans-serif; padding:20px; background:#fafafa; }
+    h2 { text-align:center; color:#2e7d32; }
+    table { width:100%; border-collapse:collapse; margin-top:20px; }
+    th, td { border:1px solid #ccc; padding:10px; text-align:center; }
+    th { background:#2e7d32; color:white; }
+    .pending { background:#fff3cd; }
+    .delivered { background:#d4edda; }
+    button { padding:6px 10px; margin:2px; border:none; border-radius:5px; cursor:pointer; }
+    .deliverBtn { background:#4CAF50; color:white; }
+    .deleteBtn { background:#d32f2f; color:white; }
+    #exportBtn { margin-top:20px; padding:10px; background:#1976d2; color:white; border-radius:6px; }
   </style>
-  <script>
-    if (localStorage.getItem("isLoggedIn") !== "true") {
-      window.location.href = "login.html";
-    }
-  </script>
 </head>
 <body>
-  <div class="landing">
-    <div class="logo-container">
-      <img src="logo.jpg" alt="M&M Logo" />
-      <h1>M&M Agro Farms</h1>
-      <div class="subtitle">Organic Taste Pottel Mutton & Desi Chicken</div>
-    </div>
+  <h2>📦 Admin Orders Dashboard</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Order ID</th><th>Name</th><th>Mobile</th><th>Mutton (kg)</th>
+        <th>Total</th><th>Address</th><th>Date</th><th>Status</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="ordersTable"></tbody>
+  </table>
 
-    <div class="offer-banner">
-      🔥 Launching Offer: Mutton @ ₹850/Kg 🔥
-    </div>
-
-    <div class="delivery-info">
-      📦 Free Delivery Within 5 km Radius of Kompally 
-    </div>
-
-    <button class="order-button">Place Order</button>
-  </div>
-
-  <div class="admin-section">
-    <h2>📋 Admin Dashboard – M&M Agro Farms</h2>
-    <button onclick="logout()" style="float:right; margin:10px;">🚪 Logout</button>
-
-    <div class="filters">
-      <label for="dateFilter">📅 Filter by date:</label>
-      <input type="date" id="dateFilter" />
-      <button onclick="filterByDate()">Filter</button>
-      <button onclick="loadOrders()">Show All</button>
-      <button onclick="exportToExcel()">Export to Excel</button>
-    </div>
-
-    <table id="ordersTable">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Name</th>
-          <th>Mobile</th>
-          <th>Mutton (kg)</th>
-          <th class="hide-service">Chicken (kg)</th>
-          <th class="hide-service">Eggs</th>
-          <th>Total (₹)</th>
-          <th>Order Date</th>
-          <th>Order Time</th>
-          <th>Delivery Date</th>
-          <th>Address</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <div id="rateCardSection">
-      <h2>📌 Today’s Rate Card</h2>
-      <div class="super-log-controls">
-        <label>Mutton (₹/kg):</label>
-        <input type="number" id="rateMutton" />
-        <label class="hide-service">Chicken (₹/kg):</label>
-        <input type="number" id="rateChicken" class="hide-service" />
-        <label class="hide-service">Egg (₹/piece):</label>
-        <input type="number" id="rateEgg" class="hide-service" />
-        <button onclick="updateRateCard()">Save Rates</button>
-      </div>
-    </div>
-
-    <div id="superLogPanel">
-      <h2>🕵️ Admin Access Logs</h2>
-      <div class="super-log-controls">
-        <button onclick="exportLogsToExcel()">Export Logs</button>
-      </div>
-      <table id="logTable">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Mobile</th>
-            <th>Action</th>
-            <th>Location</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
+  <button id="exportBtn">📤 Export to Excel</button>
 
   <script>
-    const ordersKey = "orders";
-    const logsKey = "accessLogs";
-    const rateKey = "todayRates";
+    function loadOrders() {
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      const tableBody = document.getElementById("ordersTable");
+      tableBody.innerHTML = "";
 
-    let prices = JSON.parse(localStorage.getItem(rateKey) || '{"mutton":850,"chicken":550,"egg":13}');
-    let allOrders = [];
-
-    function updateRateCard() {
-      prices = {
-        mutton: parseFloat(document.getElementById("rateMutton").value),
-        chicken: prices.chicken, // kept but hidden
-        egg: prices.egg // kept but hidden
-      };
-      localStorage.setItem(rateKey, JSON.stringify(prices));
-      alert("Rate card updated.");
-      loadOrders();
-    }
-
-    function loadRateCard() {
-      document.getElementById("rateMutton").value = prices.mutton;
-      // chicken & eggs inputs remain hidden
-    }
-
-    function getOrders() {
-      return JSON.parse(localStorage.getItem(ordersKey) || "[]");
-    }
-
-    function renderTable(data) {
-      const tbody = document.querySelector("#ordersTable tbody");
-      tbody.innerHTML = "";
-      data.forEach(order => {
+      orders.forEach((order, index) => {
         const row = document.createElement("tr");
+        row.className = order.status === "Delivered" ? "delivered" : "pending";
         row.innerHTML = `
           <td>${order.orderID}</td>
           <td>${order.name}</td>
           <td>${order.mobile}</td>
-          <td>${order.muttonKg || 0}</td>
-          <td class="hide-service">${order.chickenKg || 0}</td>
-          <td class="hide-service">${order.eggs || 0}</td>
-          <td>₹${order.total?.toFixed(2) || "0.00"}</td>
-          <td>${order.orderDate || ""}</td>
-          <td>${order.orderTime || ""}</td>
-          <td>${order.deliveryDate || ""}</td>
+          <td>${order.muttonKg}</td>
+          <td>₹${order.total}</td>
           <td>${order.address}</td>
-          <td>${order.notes || ""}</td>
+          <td>${order.orderDate}</td>
+          <td>${order.status}</td>
+          <td>
+            <button class="deliverBtn" onclick="markDelivered(${index})">✅ Delivered</button>
+            <button class="deleteBtn" onclick="deleteOrder(${index})">🗑 Delete</button>
+          </td>
         `;
-        tbody.appendChild(row);
+        tableBody.appendChild(row);
       });
     }
 
-    function loadOrders() {
-      allOrders = getOrders();
-      renderTable(allOrders);
+    function markDelivered(index) {
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      orders[index].status = "Delivered";
+      localStorage.setItem("orders", JSON.stringify(orders));
+      loadOrders();
     }
 
-    function filterByDate() {
-      const date = document.getElementById("dateFilter").value;
-      if (!date) return;
-      const filtered = allOrders.filter(o => o.deliveryDate === date);
-      renderTable(filtered);
+    function deleteOrder(index) {
+      if (!confirm("Delete this order?")) return;
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      orders.splice(index, 1);
+      localStorage.setItem("orders", JSON.stringify(orders));
+      loadOrders();
     }
 
-    function exportToExcel() {
-      const ws = XLSX.utils.table_to_sheet(document.getElementById("ordersTable"));
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Orders");
-      XLSX.writeFile(wb, "orders.xlsx");
-    }
-
-    function logout() {
-      const mobile = localStorage.getItem("adminMobile") || "unknown";
-      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
-      const now = new Date();
-      const logEntry = {
-        date: now.toLocaleDateString(),
-        time: now.toLocaleTimeString(),
-        mobile: mobile,
-        action: "Logout",
-        location: "Fetching..."
-      };
-
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          pos => {
-            logEntry.location = `Lat: ${pos.coords.latitude.toFixed(4)}, Long: ${pos.coords.longitude.toFixed(4)}`;
-            logs.push(logEntry);
-            localStorage.setItem(logsKey, JSON.stringify(logs));
-            localStorage.removeItem("isLoggedIn");
-            window.location.href = "login.html";
-          },
-          () => {
-            logEntry.location = "Location denied";
-            logs.push(logEntry);
-            localStorage.setItem(logsKey, JSON.stringify(logs));
-            localStorage.removeItem("isLoggedIn");
-            window.location.href = "login.html";
-          }
-        );
-      } else {
-        logEntry.location = "Not supported";
-        logs.push(logEntry);
-        localStorage.setItem(logsKey, JSON.stringify(logs));
-        localStorage.removeItem("isLoggedIn");
-        window.location.href = "login.html";
-      }
-    }
-
-    function exportLogsToExcel() {
-      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
-      const worksheet = XLSX.utils.json_to_sheet(logs);
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      if (!orders.length) { alert("No orders to export."); return; }
+      const worksheet = XLSX.utils.json_to_sheet(orders);
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Access Logs");
-      XLSX.writeFile(workbook, "admin-access-logs.xlsx");
-    }
-
-    document.addEventListener("keydown", function (e) {
-      if (e.ctrlKey && e.shiftKey && e.key === "L") {
-        document.getElementById("superLogPanel").style.display = "block";
-        document.getElementById("rateCardSection").style.display = "block";
-        loadLogs();
-        loadRateCard();
-      }
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+      XLSX.writeFile(workbook, "Orders.xlsx");
     });
-
-    function loadLogs() {
-      const logs = JSON.parse(localStorage.getItem(logsKey) || "[]");
-      const tbody = document.querySelector("#logTable tbody");
-      tbody.innerHTML = "";
-      logs.forEach(log => {
-        const row = `<tr>
-          <td>${log.date}</td>
-          <td>${log.time}</td>
-          <td>${log.mobile}</td>
-          <td>${log.action}</td>
-          <td>${log.location}</td>
-        </tr>`;
-        tbody.innerHTML += row;
-      });
-    }
 
     window.onload = loadOrders;
   </script>
