@@ -4,7 +4,6 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>M&M Agro Farms – Order</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -221,9 +220,18 @@
       const orderTime = new Date().toLocaleString("en-IN");
 
       const order = {
-        orderId, name, mobile, mQty, cQty, eQty, total: total.toFixed(2),
-        orderDate, orderTime, deliveryDate, address, notes,
-        delivered: false
+        orderID: orderId,
+        name: name,
+        mobile: mobile,
+        muttonKg: mQty,
+        chickenKg: cQty,
+        eggs: eQty,
+        total: parseFloat(total.toFixed(2)),
+        orderDate: orderDate,
+        orderTime: orderTime,
+        deliveryDate: deliveryDate,
+        address: address,
+        notes: notes || ""
       };
 
       const message =
@@ -232,13 +240,14 @@
         `📍 ${address}\n📅 ${orderDate}\n⏰ ${orderTime}\n🚚 ${deliveryDate}\n` +
         `📝 ${notes || "-"}`;
 
-      // WhatsApp link
+      // Send to business WhatsApp
       window.open(`https://wa.me/918688014021?text=${encodeURIComponent(message)}`, "_blank");
+      // Send confirmation to customer
       setTimeout(() => {
         window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`, "_blank");
       }, 800);
 
-      // Store order in localStorage
+      // Store order
       const storedOrders = JSON.parse(localStorage.getItem("orders") || "[]");
       storedOrders.push(order);
       localStorage.setItem("orders", JSON.stringify(storedOrders));
