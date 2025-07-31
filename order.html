@@ -117,11 +117,14 @@
       <label>Mutton (₹850/kg)</label>
       <input type="number" id="mutton" min="0" value="0" step="0.001" />
 
+      <!-- Hidden for now -->
+      <!--
       <label>Desi Chicken (₹550/kg)</label>
       <input type="number" id="chicken" min="0" value="0" step="0.001" />
 
       <label>Desi Eggs (₹13 each)</label>
       <input type="number" id="eggs" min="0" value="0" step="1" />
+      -->
 
       <label>Order Date</label>
       <input type="date" id="orderDate" readonly />
@@ -143,22 +146,22 @@
   </div>
 
   <script>
-    const prices = { mutton: 850, chicken: 550, eggs: 13 };
+    const prices = { mutton: 850 /*, chicken: 550, eggs: 13 */ };
     const muttonEl = document.getElementById("mutton");
-    const chickenEl = document.getElementById("chicken");
-    const eggsEl = document.getElementById("eggs");
+    // const chickenEl = document.getElementById("chicken");
+    // const eggsEl = document.getElementById("eggs");
     const totalEl = document.getElementById("totalAmount");
 
     function calculateTotal() {
       const total =
-        (parseFloat(muttonEl.value || 0) * prices.mutton) +
-        (parseFloat(chickenEl.value || 0) * prices.chicken) +
-        (parseFloat(eggsEl.value || 0) * prices.eggs);
+        (parseFloat(muttonEl.value || 0) * prices.mutton);
+        // + (parseFloat(chickenEl.value || 0) * prices.chicken)
+        // + (parseFloat(eggsEl.value || 0) * prices.eggs);
       totalEl.innerText = `💰 Total: ₹${total.toFixed(2)}`;
       return total;
     }
 
-    [muttonEl, chickenEl, eggsEl].forEach(i =>
+    [muttonEl /*, chickenEl, eggsEl*/].forEach(i =>
       i.addEventListener("input", calculateTotal)
     );
 
@@ -209,8 +212,8 @@
       const name = document.getElementById("name").value;
       const mobile = document.getElementById("mobile").value;
       const mQty = parseFloat(muttonEl.value || 0);
-      const cQty = parseFloat(chickenEl.value || 0);
-      const eQty = parseFloat(eggsEl.value || 0);
+      // const cQty = parseFloat(chickenEl.value || 0);
+      // const eQty = parseFloat(eggsEl.value || 0);
       const orderDate = document.getElementById("orderDate").value;
       const address = document.getElementById("address").value;
       const notes = document.getElementById("notes").value;
@@ -224,8 +227,8 @@
         name: name,
         mobile: mobile,
         muttonKg: mQty,
-        chickenKg: cQty,
-        eggs: eQty,
+        // chickenKg: cQty,
+        // eggs: eQty,
         total: parseFloat(total.toFixed(2)),
         orderDate: orderDate,
         orderTime: orderTime,
@@ -236,7 +239,7 @@
 
       const message =
         `🌿 M&M Agro Farms 🌿\n🆔 ${orderId}\n👤 ${name}\n📞 ${mobile}\n` +
-        `📦 ${mQty}kg Mutton, ${cQty}kg Chicken, ${eQty} Eggs\n💰 ₹${total.toFixed(2)}\n` +
+        `📦 ${mQty}kg Mutton\n💰 ₹${total.toFixed(2)}\n` +
         `📍 ${address}\n📅 ${orderDate}\n⏰ ${orderTime}\n🚚 ${deliveryDate}\n` +
         `📝 ${notes || "-"}`;
 
