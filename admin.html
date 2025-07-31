@@ -14,7 +14,6 @@
       padding: 0;
     }
 
-    /* Landing Section */
     .landing {
       text-align: center;
       padding: 20px;
@@ -76,12 +75,9 @@
     }
 
     @keyframes blink {
-      50% {
-        opacity: 0.3;
-      }
+      50% { opacity: 0.3; }
     }
 
-    /* Admin Section */
     .admin-section {
       background-color: #f4f7f8;
       color: #000;
@@ -142,23 +138,16 @@
       margin-top: 40px;
     }
 
+    /* HIDE chicken & egg related inputs/columns */
+    .hide-service {
+      display: none;
+    }
+
     @media screen and (max-width: 600px) {
-      .logo-container h1 {
-        font-size: 24px;
-      }
-
-      .offer-banner, .delivery-info {
-        font-size: 14px;
-      }
-
-      .order-button {
-        font-size: 16px;
-        width: 90%;
-      }
-
-      table {
-        font-size: 12px;
-      }
+      .logo-container h1 { font-size: 24px; }
+      .offer-banner, .delivery-info { font-size: 14px; }
+      .order-button { font-size: 16px; width: 90%; }
+      table { font-size: 12px; }
     }
   </style>
   <script>
@@ -168,8 +157,6 @@
   </script>
 </head>
 <body>
-
-  <!-- Landing / Hero Section -->
   <div class="landing">
     <div class="logo-container">
       <img src="logo.jpg" alt="M&M Logo" />
@@ -178,17 +165,16 @@
     </div>
 
     <div class="offer-banner">
-      🔥 Launching Offer: Mutton @ ₹850/Kg, Desi Chicken @ ₹550/Kg 🔥
+      🔥 Launching Offer: Mutton @ ₹850/Kg 🔥
     </div>
 
     <div class="delivery-info">
-      📦 Free delivery near Kompally & Karimnagar (5 km radius)
+      📦 Free Delivery Within 5 km Radius of Kompally 
     </div>
 
     <button class="order-button">Place Order</button>
   </div>
 
-  <!-- Admin Dashboard Section -->
   <div class="admin-section">
     <h2>📋 Admin Dashboard – M&M Agro Farms</h2>
     <button onclick="logout()" style="float:right; margin:10px;">🚪 Logout</button>
@@ -208,8 +194,8 @@
           <th>Name</th>
           <th>Mobile</th>
           <th>Mutton (kg)</th>
-          <th>Chicken (kg)</th>
-          <th>Eggs</th>
+          <th class="hide-service">Chicken (kg)</th>
+          <th class="hide-service">Eggs</th>
           <th>Total (₹)</th>
           <th>Order Date</th>
           <th>Order Time</th>
@@ -226,10 +212,10 @@
       <div class="super-log-controls">
         <label>Mutton (₹/kg):</label>
         <input type="number" id="rateMutton" />
-        <label>Chicken (₹/kg):</label>
-        <input type="number" id="rateChicken" />
-        <label>Egg (₹/piece):</label>
-        <input type="number" id="rateEgg" />
+        <label class="hide-service">Chicken (₹/kg):</label>
+        <input type="number" id="rateChicken" class="hide-service" />
+        <label class="hide-service">Egg (₹/piece):</label>
+        <input type="number" id="rateEgg" class="hide-service" />
         <button onclick="updateRateCard()">Save Rates</button>
       </div>
     </div>
@@ -254,7 +240,6 @@
     </div>
   </div>
 
-  <!-- Scripts -->
   <script>
     const ordersKey = "orders";
     const logsKey = "accessLogs";
@@ -266,8 +251,8 @@
     function updateRateCard() {
       prices = {
         mutton: parseFloat(document.getElementById("rateMutton").value),
-        chicken: parseFloat(document.getElementById("rateChicken").value),
-        egg: parseFloat(document.getElementById("rateEgg").value)
+        chicken: prices.chicken, // kept but hidden
+        egg: prices.egg // kept but hidden
       };
       localStorage.setItem(rateKey, JSON.stringify(prices));
       alert("Rate card updated.");
@@ -276,8 +261,7 @@
 
     function loadRateCard() {
       document.getElementById("rateMutton").value = prices.mutton;
-      document.getElementById("rateChicken").value = prices.chicken;
-      document.getElementById("rateEgg").value = prices.egg;
+      // chicken & eggs inputs remain hidden
     }
 
     function getOrders() {
@@ -294,8 +278,8 @@
           <td>${order.name}</td>
           <td>${order.mobile}</td>
           <td>${order.muttonKg || 0}</td>
-          <td>${order.chickenKg || 0}</td>
-          <td>${order.eggs || 0}</td>
+          <td class="hide-service">${order.chickenKg || 0}</td>
+          <td class="hide-service">${order.eggs || 0}</td>
           <td>₹${order.total?.toFixed(2) || "0.00"}</td>
           <td>${order.orderDate || ""}</td>
           <td>${order.orderTime || ""}</td>
