@@ -32,6 +32,8 @@
       <input type="tel" id="mobile" required />
       <label>Mutton (₹850/kg)</label>
       <input type="number" id="mutton" min="0" value="0" step="0.001" />
+      <label>Eggs (₹13/egg)</label>
+      <input type="number" id="eggs" min="0" value="0" step="1" />
 
       <label>Order Date</label>
       <input type="date" id="orderDate" readonly />
@@ -48,17 +50,21 @@
   </div>
 
   <script>
-    const prices = { mutton: 850 };
+    const prices = { mutton: 850, egg: 13 };
     const muttonEl = document.getElementById("mutton");
+    const eggsEl = document.getElementById("eggs");
     const totalEl = document.getElementById("totalAmount");
 
     function calculateTotal() {
-      const total = (parseFloat(muttonEl.value || 0) * prices.mutton);
+      const muttonTotal = parseFloat(muttonEl.value || 0) * prices.mutton;
+      const eggTotal = parseInt(eggsEl.value || 0) * prices.egg;
+      const total = muttonTotal + eggTotal;
       totalEl.innerText = `💰 Total: ₹${total.toFixed(2)}`;
       return total;
     }
 
     muttonEl.addEventListener("input", calculateTotal);
+    eggsEl.addEventListener("input", calculateTotal);
 
     function getNextSunday() {
       const today = new Date();
@@ -96,6 +102,7 @@
       const name = document.getElementById("name").value;
       const mobile = document.getElementById("mobile").value;
       const mQty = parseFloat(muttonEl.value || 0);
+      const eggQty = parseInt(eggsEl.value || 0);
       const orderDate = document.getElementById("orderDate").value;
       const address = document.getElementById("address").value;
       const notes = document.getElementById("notes").value;
@@ -104,23 +111,26 @@
       const deliveryDate = document.getElementById("deliveryDate").value;
       const orderTime = new Date().toLocaleString("en-IN");
 
-      const order = { orderID: orderId, name, mobile, muttonKg:mQty, total:parseFloat(total.toFixed(2)),
-        orderDate, orderTime, deliveryDate, address, notes:notes||"", status:"Pending" };
+      const order = {
+        orderID: orderId, name, mobile, muttonKg: mQty, eggs: eggQty,
+        total: parseFloat(total.toFixed(2)), orderDate, orderTime,
+        deliveryDate, address, notes: notes || "", status: "Pending"
+      };
 
-      const storedOrders = JSON.parse(localStorage.getItem("orders")||"[]");
+      const storedOrders = JSON.parse(localStorage.getItem("orders") || "[]");
       storedOrders.push(order);
       localStorage.setItem("orders", JSON.stringify(storedOrders));
 
       const message =
         `🌿 M&M Agro Farms 🌿\n🆔 ${orderId}\n👤 ${name}\n📞 ${mobile}\n` +
-        `📦 ${mQty}kg Mutton\n💰 ₹${total.toFixed(2)}\n` +
+        `📦 Mutton: ${mQty}kg\n🥚 Eggs: ${eggQty}\n💰 ₹${total.toFixed(2)}\n` +
         `📍 ${address}\n📅 ${orderDate}\n⏰ ${orderTime}\n🚚 ${deliveryDate}\n` +
-        `📝 ${notes||"-"}`;
+        `📝 ${notes || "-"}`;
 
       const adminNumber = "918688014021";
       window.open(`https://wa.me/${adminNumber}?text=${encodeURIComponent(message)}`, "_blank");
 
-      setTimeout(()=> {
+      setTimeout(() => {
         window.open(`https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`, "_blank");
       }, 1000);
 
