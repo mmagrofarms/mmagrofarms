@@ -96,8 +96,8 @@
       const nextSunday = getNextSunday();
       const cutoff = new Date(nextSunday);
       cutoff.setDate(cutoff.getDate() - 1);
-      cutoff.setHours(21,0,0,0);
-      if (now > cutoff) { alert("🚫 Orders closed after Saturday 9 PM."); return; }
+      cutoff.setHours(23,0,0,0);
+      if (now > cutoff) { alert("🚫 Orders closed after Saturday 11 PM."); return; }
 
       const name = document.getElementById("name").value;
       const mobile = document.getElementById("mobile").value;
