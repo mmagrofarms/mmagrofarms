@@ -30,12 +30,23 @@
       <input type="text" id="name" required />
       <label>Mobile</label>
       <input type="tel" id="mobile" required />
+
       <label>Mutton (₹850/kg)</label>
       <input type="number" id="mutton" min="0" value="0" step="0.001" />
       <label>Eggs (₹13/egg)</label>
       <input type="number" id="eggs" min="0" value="0" step="1" />
       <label>Chicken (₹550/kg)</label>
       <input type="number" id="chicken" min="0" value="0" step="0.001" />
+
+      <!-- New Items -->
+      <label>Keema with Bone (₹900/kg)</label>
+      <input type="number" id="keemaBone" min="0" value="0" step="0.001" />
+      <label>Keema Boneless (₹1100/kg)</label>
+      <input type="number" id="keemaBoneless" min="0" value="0" step="0.001" />
+      <label>Head & Legs Set (₹750/kg)</label>
+      <input type="number" id="headLegs" min="0" value="0" step="0.001" />
+      <label>Boti (₹300/kg)</label>
+      <input type="number" id="boti" min="0" value="0" step="0.001" />
 
       <label>Order Date</label>
       <input type="date" id="orderDate" readonly />
@@ -52,24 +63,41 @@
   </div>
 
   <script>
-    const prices = { mutton: 850, egg: 13, chicken: 550 };
+    const prices = { 
+      mutton: 850, 
+      egg: 13, 
+      chicken: 550,
+      keemaBone: 900,
+      keemaBoneless: 1100,
+      headLegs: 750,
+      boti: 300
+    };
+
     const muttonEl = document.getElementById("mutton");
     const eggsEl = document.getElementById("eggs");
     const chickenEl = document.getElementById("chicken");
+    const keemaBoneEl = document.getElementById("keemaBone");
+    const keemaBonelessEl = document.getElementById("keemaBoneless");
+    const headLegsEl = document.getElementById("headLegs");
+    const botiEl = document.getElementById("boti");
     const totalEl = document.getElementById("totalAmount");
 
     function calculateTotal() {
       const muttonTotal = parseFloat(muttonEl.value || 0) * prices.mutton;
       const eggTotal = parseInt(eggsEl.value || 0) * prices.egg;
       const chickenTotal = parseFloat(chickenEl.value || 0) * prices.chicken;
-      const total = muttonTotal + eggTotal + chickenTotal;
+      const keemaBoneTotal = parseFloat(keemaBoneEl.value || 0) * prices.keemaBone;
+      const keemaBonelessTotal = parseFloat(keemaBonelessEl.value || 0) * prices.keemaBoneless;
+      const headLegsTotal = parseFloat(headLegsEl.value || 0) * prices.headLegs;
+      const botiTotal = parseFloat(botiEl.value || 0) * prices.boti;
+
+      const total = muttonTotal + eggTotal + chickenTotal + keemaBoneTotal + keemaBonelessTotal + headLegsTotal + botiTotal;
       totalEl.innerText = `💰 Total: ₹${total.toFixed(2)}`;
       return total;
     }
 
-    muttonEl.addEventListener("input", calculateTotal);
-    eggsEl.addEventListener("input", calculateTotal);
-    chickenEl.addEventListener("input", calculateTotal);
+    [muttonEl, eggsEl, chickenEl, keemaBoneEl, keemaBonelessEl, headLegsEl, botiEl]
+      .forEach(el => el.addEventListener("input", calculateTotal));
 
     function getNextSunday() {
       const today = new Date();
@@ -109,6 +137,11 @@
       const mQty = parseFloat(muttonEl.value || 0);
       const eggQty = parseInt(eggsEl.value || 0);
       const cQty = parseFloat(chickenEl.value || 0);
+      const keemaBoneQty = parseFloat(keemaBoneEl.value || 0);
+      const keemaBonelessQty = parseFloat(keemaBonelessEl.value || 0);
+      const headLegsQty = parseFloat(headLegsEl.value || 0);
+      const botiQty = parseFloat(botiEl.value || 0);
+
       const orderDate = document.getElementById("orderDate").value;
       const address = document.getElementById("address").value;
       const notes = document.getElementById("notes").value;
@@ -118,8 +151,10 @@
       const orderTime = new Date().toLocaleString("en-IN");
 
       const order = {
-        orderID: orderId, name, mobile, muttonKg: mQty, eggs: eggQty,
-        chickenKg: cQty, total: parseFloat(total.toFixed(2)),
+        orderID: orderId, name, mobile,
+        muttonKg: mQty, eggs: eggQty, chickenKg: cQty,
+        keemaBoneKg: keemaBoneQty, keemaBonelessKg: keemaBonelessQty, headLegsKg: headLegsQty, botiKg: botiQty,
+        total: parseFloat(total.toFixed(2)),
         orderDate, orderTime, deliveryDate, address, notes: notes || "", status: "Pending"
       };
 
@@ -130,6 +165,7 @@
       const message =
         `🌿 M&M Agro Farms 🌿\n🆔 ${orderId}\n👤 ${name}\n📞 ${mobile}\n` +
         `📦 Mutton: ${mQty}kg\n🥚 Eggs: ${eggQty}\n🍗 Chicken: ${cQty}kg\n` +
+        `🥩 Keema (Bone): ${keemaBoneQty}kg\n🥩 Keema (Boneless): ${keemaBonelessQty}kg\n🐐 Head & Legs: ${headLegsQty}kg\n🍲 Boti: ${botiQty}kg\n` +
         `💰 ₹${total.toFixed(2)}\n📍 ${address}\n📅 ${orderDate}\n⏰ ${orderTime}\n🚚 ${deliveryDate}\n` +
         `📝 ${notes || "-"}`;
 
